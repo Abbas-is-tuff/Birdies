@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 29 (phone voice)</div>
+<div id="ver">version 30 (phone guy)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -411,20 +411,24 @@ const phone={st:'idle',t:0,n:1,txt:[],dur:[],total:0,spk:false,rb:0};
 const phoneText=n=>NIGHT_MSG[n-1].replace(/<br>[\s\S]*$/,'').replace(/<[^>]+>/g,'').replace(/^\s*"|"\s*$/g,'').replace(/\s+/g,' ').trim();
 let ttsVoice=null;
 const lsG=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}},lsS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const PITCH=[['Deep',.45],['Low',.7],['Normal',1],['High',1.35]];
+const PITCH=[['Deep',.45],['Phone Guy',.78],['Normal',1],['High',1.35]];
 const enVoices=()=>{try{return speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang))}catch(e){return[]}};
 const pickVoice=()=>{try{const v=enVoices(),want=lsG('fnab_voice','');ttsVoice=(want&&v.find(x=>x.name===want))||v.find(x=>/daniel|david|alex|guy|mark|male|fred|arthur|rishi/i.test(x.name))||v.find(x=>/en-(US|GB)/i.test(x.lang))||v[0]||null}catch(e){}};
 const ttsPitch=()=>{const i=+lsG('fnab_pitch','1');return PITCH[i>=0&&i<PITCH.length?i:1][1]};
-function ttsSample(){try{speechSynthesis.cancel();pickVoice();const u=new SpeechSynthesisUtterance('Hello? Welcome to Wingfield. Have a tweet night.');if(ttsVoice){u.voice=ttsVoice;u.lang=ttsVoice.lang}u.rate=.95;u.pitch=ttsPitch();speechSynthesis.speak(u)}catch(e){}}
+function ttsSample(){try{speechSynthesis.cancel();pickVoice();const u=new SpeechSynthesisUtterance('Hello? Welcome to Wingfield. Have a tweet night.');if(ttsVoice){u.voice=ttsVoice;u.lang=ttsVoice.lang}u.rate=.88;u.pitch=ttsPitch();phoneLine(true);u.onend=()=>phoneLine(false);speechSynthesis.speak(u)}catch(e){}}
 function voiceUI(){const v=enVoices(),want=lsG('fnab_voice',''),b=$('tvb'),p=$('tvp');if(!b)return;b.textContent=want||(ttsVoice?'Auto: '+ttsVoice.name.replace(/Microsoft |Google /,'').slice(0,18):'Auto');p.textContent=PITCH[+lsG('fnab_pitch','1')][0]}
 
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 function ttsUnlock(){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+let lineN=null;
+function phoneLine(on){try{if(lineN){lineN.src.stop();lineN.hum.stop();lineN=null}if(!on)return;const a=AC(),len=a.sampleRate*2,buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(Math.random()<.0008?4:1);
+ const src=a.createBufferSource();src.buffer=buf;src.loop=true;const bp=a.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1800;bp.Q.value=.6;const g=a.createGain();g.gain.value=.022;src.connect(bp);bp.connect(g);g.connect(a.destination);src.start();
+ const hum=a.createOscillator();hum.frequency.value=60;const hg=a.createGain();hg.gain.value=.006;hum.connect(hg);hg.connect(a.destination);hum.start();lineN={src,hum}}catch(e){}}
 function phoneStart(n){phoneStop();phone.st='ring';phone.t=0;phone.n=n;phone.spk=false;phone.rb=0;
  phone.txt=phoneText(n).split(/(?<=[.!?])\s+/).filter(Boolean);phone.dur=phone.txt.map(x=>Math.max(1.6,x.length*.068+.4));phone.total=phone.dur.reduce((a,b)=>a+b,0);
  const b=$('phbtn');b.style.display='block';b.className='ring';b.textContent='📞 Answer'}
-function phoneStop(){phone.st='idle';try{speechSynthesis.cancel()}catch(e){}phone.spk=false;try{$('phcap').style.display='none';$('phbtn').style.display='none'}catch(e){}}
-function phoneTalk(){phone.st='talk';phone.t=4.2;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(phone.txt.join(' '));if(!ttsVoice)pickVoice();if(ttsVoice)u.voice=ttsVoice;u.lang=ttsVoice?ttsVoice.lang:'en-US';u.rate=.95;u.pitch=ttsPitch();u.volume=1;u.onstart=()=>{phone.spk=true};u.onend=()=>{phone.spk=false};u.onerror=()=>{phone.spk=false};speechSynthesis.speak(u)}catch(e){}
+function phoneStop(){if(phone.st==='talk')snd(1200,.03,'square',.06);phoneLine(false);phone.st='idle';try{speechSynthesis.cancel()}catch(e){}phone.spk=false;try{$('phcap').style.display='none';$('phbtn').style.display='none'}catch(e){}}
+function phoneTalk(){snd(900,.03,'square',.07);phoneLine(true);phone.st='talk';phone.t=4.2;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(phone.txt.join(' '));if(!ttsVoice)pickVoice();if(ttsVoice)u.voice=ttsVoice;u.lang=ttsVoice?ttsVoice.lang:'en-US';u.rate=.88;u.pitch=ttsPitch();u.volume=1;u.onstart=()=>{phone.spk=true};u.onend=()=>{phone.spk=false};u.onerror=()=>{phone.spk=false};speechSynthesis.speak(u)}catch(e){}
  const b=$('phbtn');b.className='';b.textContent='📵 Hang up'}
 function phoneBtn(){if(phone.st==='ring'){snd(300,.1,'sine',.1);phoneTalk()}else if(phone.st==='talk'){snd(200,.15,'square',.1);phoneStop()}}
 function phoneStep(dt){if(phone.st==='idle')return;phone.t+=dt;
