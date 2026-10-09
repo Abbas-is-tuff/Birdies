@@ -231,7 +231,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 13 (lifelike birds)</div>
+<div id="ver">version 14 (death wipes save)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -597,13 +597,13 @@ function bigScream(){try{const a=AC(),t=a.currentTime,dist=a.createWaveShaper(),
  const sb=a.createOscillator(),sg=a.createGain();sb.frequency.setValueAtTime(75,t);sb.frequency.exponentialRampToValueAtTime(28,t+.9);sg.gain.setValueAtTime(.9,t);sg.gain.exponentialRampToValueAtTime(.001,t+1);sb.connect(sg);sg.connect(a.destination);sb.start(t);sb.stop(t+1.05)}catch(e){}
  noiseBurst(1,.55)}
 function scare(b){
- state='dead';clearInterval(loop);stopMB();
+ state='dead';clearInterval(loop);stopMB();const hadSave=!!getSave();try{localStorage.removeItem(SAVEK)}catch(e){}
  const s=$('scare');s.innerHTML='';s.classList.add('on','pre');bigRumble();
  setTimeout(()=>{
   s.classList.remove('pre');s.innerHTML=bhtml(b)+bhtml(b);s.classList.add('red');bigScream();setTimeout(()=>s.classList.remove('red'),120);
   try{navigator.vibrate&&navigator.vibrate([250,60,350,60,600])}catch(e){}
   try{$('view').animate([{filter:'brightness(4) invert(1)'},{filter:'none'}],{duration:180})}catch(e){}
-  setTimeout(()=>{s.innerHTML='<div class="stat" style="opacity:1"></div>';snd(90,.7,'sawtooth',.2);setTimeout(()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) Tip: close a door as soon as you see a bird in it — but mind your power.`,'Retry Night '+night,()=>begin(night))},900)},1700)},280);
+  setTimeout(()=>{s.innerHTML='<div class="stat" style="opacity:1"></div>';snd(90,.7,'sawtooth',.2);setTimeout(()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) ${hadSave?'<br><br>💾 Your saved game was lost. Night '+night+' starts over from 12 AM.':''}<br><br>Tip: close a door as soon as you see a bird in it — but mind your power.`,'Restart Night '+night,()=>begin(night))},900)},1700)},280);
 }
 
 function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(Math.min(5,night+1))}catch(e){}
