@@ -231,7 +231,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 11 (realistic birds)</div>
+<div id="ver">version 12 (easier)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -377,11 +377,11 @@ function start(n){
  state='play';render();clearInterval(loop);loop=setInterval(step,100);
 }
 
-function aggr(b){return Math.min(.92,.26+night*.09+b.k+hour*.04)}
-const atkWait=()=>Math.max(5,7.5-(night-1)*.6)+(fanOn?1.5:0);
+function aggr(b){return Math.min(.8,.2+night*.075+b.k+hour*.032)}
+const atkWait=()=>Math.max(6.5,9-(night-1)*.5)+(fanOn?1.5:0);
 
 let fanOn=true;
-function usage(){const p={base:.23+night*.022,doors:(closed.L?.15:0)+(closed.R?.15:0),lights:(lit.L||lit.R?.12:0),cams:cam?.13:0,fan:fanOn?.07:0,pushing:BIRDS.filter(b=>b.pos===3&&closed[b.side]).length*.08+BIRDS.filter(b=>b.id==='pika'&&b.pos===3).length*.3};p.total=Object.values(p).reduce((a,b)=>a+b,0);return p}
+function usage(){const p={base:.2+night*.018,doors:(closed.L?.15:0)+(closed.R?.15:0),lights:(lit.L||lit.R?.12:0),cams:cam?.13:0,fan:fanOn?.07:0,pushing:BIRDS.filter(b=>b.pos===3&&closed[b.side]).length*.08+BIRDS.filter(b=>b.id==='pika'&&b.pos===3).length*.3};p.total=Object.values(p).reduce((a,b)=>a+b,0);return p}
 function toggleFan(){}
 function step(){
  if(state!=='play')return;
@@ -392,11 +392,11 @@ function step(){
  else{camBat=Math.min(100,camBat+dt*100/45);if(camLock&&camBat>=35)camLock=false;if(camBat>=40)camWarn=false}
  lureCd=Math.max(0,lureCd-dt);
  // Puffy's music box: wind it or he escapes
- {const was=pf.box;pf.box=Math.max(0,pf.box-dt*100/Math.max(13,32-night*2.6));
+ {const was=pf.box;pf.box=Math.max(0,pf.box-dt*100/Math.max(20,46-night*2.6));
   if(pf.box>0){pf.grace=0;pf.mt-=dt;if(pf.mt<=0){const st=pf.n++%PFT.length,f=PFT[st],slow=1-pf.box/100,droop=Math.pow(2,-slow*slow*.5/12),near=cam&&camSel===5;
    if(f)mbNote(f*droop,near?.11:.06,near);if(st%8===0)mbNote(PFB[(st/8|0)%PFB.length]*droop,near?.07:.04,near);
    pf.mt=.19+slow*.22+(slow>.7?Math.random()*.12:0)}}
-  else{if(was>0)snd(200,.3,'sawtooth',.12);pf.grace+=dt;if(pf.grace>1.5&&Math.random()<.2)snd(90+Math.random()*40,.12,'square',.06);if(pf.grace>=4.5){scare(pf);return}}}
+  else{if(was>0)snd(200,.3,'sawtooth',.12);pf.grace+=dt;if(pf.grace>1.5&&Math.random()<.2)snd(90+Math.random()*40,.12,'square',.06);if(pf.grace>=6.5){scare(pf);return}}}
  // power
  if(power>0){
   let use=usage().total;
@@ -553,7 +553,7 @@ function doLure(){if(state!=='play'||!cam||power<=0)return;if(lureCd>0){snd(150,
  lureCd=10;power=Math.max(0,power-1.5);[523,659,784,659].forEach((f,i)=>setTimeout(()=>snd(f,.35,'triangle',.1),i*220));
  if(lemon.rage<=0&&Math.abs(lemon.pos-T)<=1&&lemon.pos<3){lemon.pos=T;lemon.st=9+Math.random()*4;setTimeout(()=>snd(110,.3,'triangle',.12),900)}}
 tap('lure',doLure);
-function doWind(){if(state!=='play'||!cam)return;pf.box=Math.min(100,pf.box+22);pf.grace=0;for(let k=0;k<6;k++)mbClick(k)}
+function doWind(){if(state!=='play'||!cam)return;pf.box=Math.min(100,pf.box+30);pf.grace=0;for(let k=0;k<6;k++)mbClick(k)}
 tap('wind',doWind);
 (()=>{const mk=(id,kids)=>{const d=document.createElement('div');d.id=id;kids.forEach(k=>d.appendChild($(k)));$('app').appendChild(d)};
  $('kL').textContent='DOOR';$('kR').textContent='DOOR';$('lL').textContent='LIGHT';$('lR').textContent='LIGHT';$('kC').innerHTML='▲ ▲ ▲ ▲ ▲';
