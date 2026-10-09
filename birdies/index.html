@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 32 (languages)</div>
+<div id="ver">version 33 (exit button)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -328,7 +328,7 @@ let camBat=100,camLock=false,camWarn=false,lureCd=0;
 let night=1,hour=0,t=0,power=100,closed={L:false,V:false,R:false},lit={L:false,V:false,R:false},cam=false,camSel=0,state='menu',tick=0,outTimer=0,loop;
 
 function bhtml(b,sc){const src=sc&&b.scarePic?b.scarePic:b.pic;if(src)return `<img class="bimg pic3d ${b.fx||''}" src="${src}" alt="${b.name}">`;return b.img?`<img class="bimg ${b.fx||''}" src="${b.img}" alt="${b.name}">`:`<span style="${b.style}">${b.e}</span>`}
-function overlay(h,p,btn,fn){const o=$('ov');o.innerHTML=`<h1>${h}</h1><p>${p}</p><button id="go">${btn}</button>`;o.classList.add('on');$('app').classList.add('inmenu');o.scrollTop=0;$('go').onclick=()=>{o.classList.remove('on');$('app').classList.remove('inmenu');fn()}}
+function overlay(h,p,btn,fn,mb){const o=$('ov');o.innerHTML=`<h1>${h}</h1><p>${p}</p><button id="go">${btn}</button>${mb?'<button id="goMenu">Exit to Main Menu</button>':''}`;if(mb)$('goMenu').onclick=()=>{o.classList.remove('on');try{stopMB()}catch(e){}$('dark').style.opacity=0;menu()};o.classList.add('on');$('app').classList.add('inmenu');o.scrollTop=0;$('go').onclick=()=>{o.classList.remove('on');$('app').classList.remove('inmenu');fn()}}
 
 const NIGHT_MSG=[
 `"Hello? Hello! Welcome to Wingfield. The birds get a little... lively after midnight. Closed doors block them, lights reveal them, cameras track them. Silver is shy: he only moves when you are NOT watching. Sugar is the opposite. Don't ask me why. Oh, and Aziz lives in the gold cage on CAM 7. Keep an eye on him. If you stop watching, he gets out and sprints down the hall. When you hear him running, shut the door on his side before he arrives. Have a tweet night!" <br><small>- Previous guard, recorded message</small>`,
@@ -750,7 +750,7 @@ function scare(b){
   s.classList.remove('pre');s.innerHTML=bhtml(b,1)+bhtml(b,1);s.classList.add('red');bigScream();setTimeout(()=>s.classList.remove('red'),120);
   try{navigator.vibrate&&navigator.vibrate([250,60,350,60,600])}catch(e){}
   try{$('view').animate([{filter:'brightness(4) invert(1)'},{filter:'none'}],{duration:180})}catch(e){}
-  setTimeout(()=>{s.innerHTML='<div class="stat" style="opacity:1"></div>';snd(90,.7,'sawtooth',.2);setTimeout(()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) ${hadSave?'<br><br>💾 Your saved game was lost. Night '+night+' starts over from 12 AM.':''}<br><br>Tip: close a door as soon as you see a bird in it — but mind your power.`,'Restart Night '+night,()=>begin(night))},900)},1700)},280);
+  setTimeout(()=>{s.innerHTML='<div class="stat" style="opacity:1"></div>';snd(90,.7,'sawtooth',.2);setTimeout(()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) ${hadSave?'<br><br>💾 Your saved game was lost. Night '+night+' starts over from 12 AM.':''}<br><br>Tip: close a door as soon as you see a bird in it — but mind your power.`,'Restart Night '+night,()=>begin(night),1)},900)},1700)},280);
 }
 
 function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(Math.min(5,night+1))}catch(e){}
@@ -758,7 +758,7 @@ function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(M
  snd(523,.3,'sine',.15);setTimeout(()=>snd(659,.3,'sine',.15),250);setTimeout(()=>snd(784,.5,'sine',.15),500);
  card('5 AM &rarr; 6 AM','',3200,()=>{
  if(night>=5)overlay('6 AM — You survived!','All five nights done. The sun is up and the birds are asleep… for now. 🐤','Main menu',()=>menu());
- else overlay('6 AM',`Night ${night} survived. The birds will be angrier tomorrow.`,`Start Night ${night+1}`,()=>intro(night+1));
+ else overlay('6 AM',`Night ${night} survived. The birds will be angrier tomorrow.`,`Start Night ${night+1}`,()=>intro(night+1),1);
  });
 }
 function init3D(){
