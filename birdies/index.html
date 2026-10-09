@@ -237,7 +237,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 20 (office decor)</div>
+<div id="ver">version 21 (door fix)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -805,7 +805,7 @@ function init3D(){
   [1.2,3.6,6].forEach((k,n)=>{bx(.5,.05,.3,HM.lamp,x+o*k,2.58,-.2)});
   [1.9,4.6].forEach(k=>wz.forEach((z,zi)=>bx(.9,2.1,.05,MT(0x2b2e38),x+o*k,1.05,z+(zi?-.05:.05))));
   const lh=new THREE.PointLight(0xffe0a0,.3,9);lh.position.set(x+o*3,2.2,-.2);sc.add(lh);
-  WS[s]={d,x,ry,sh,sky:HM.sky,lg,lh,act:{},cap,cap2,bx:ix,cz:-.2,place:(m,i,n,y)=>m.position.set(x-d*.5,y,-.2+(i-(n-1)/2)*1.1)};
+  WS[s]={d,x,ry,sh,sky:HM.sky,lg,lh,act:{},cap,cap2,bx:ix,cz:-.2,place:(m,i,n,y)=>{const zo=n<2?0:[-.25,.25,0][i%3];m.position.set(x-d*(.7+(i>1?.4:0)),y,-.2+zo)}};
  });
  // bird planes
  const PAL={
@@ -1314,7 +1314,7 @@ const FEA=(()=>{
     const l=lit[s]&&pw;W.lg.intensity=l?1.1:0;W.lh.intensity=l?1.5:.3;W.sky.color.setHex(l?0xffffff:0x50566a);
     Object.values(W.act).forEach(m=>m.visible=false);W.act={};
     const list=here.concat(sh?[sal]:[]);
-    list.forEach((o,i)=>{const m=bmesh(o);if(!m)return;W.act[o.name]=m;m.visible=!closed[s]&&l;W.place(m,i,list.length,.8+Math.sin(now/300+i)*.02);m.rotation.y=W.ry+Math.sin(now/700+i)*.15;m.scale.set(1.7,1.7*(1+Math.sin(now/480+i)*.014),1.7);const u=m.userData;u.head.rotation.y=Math.sin(now/1100+i*2)*.4;u.head.rotation.z=Math.sin(now/700+i)*.12;u.head.rotation.x=(u.hxb||0)+Math.sin(now/900+i)*.06;const bl=((now+i*1300)%3600)<120?.1:1;u.eyes.forEach(e=>e.m.scale.y=e.sy*bl)});
+    list.forEach((o,i)=>{const m=bmesh(o);if(!m)return;W.act[o.name]=m;m.visible=!closed[s]&&l;const q=list.length>1?1.2:1.35;W.place(m,i,list.length,.455*q+.03+Math.sin(now/300+i)*.01);m.rotation.y=W.ry+Math.sin(now/700+i)*.15;m.scale.set(q,q*(1+Math.sin(now/480+i)*.014),q);const u=m.userData;u.head.rotation.y=Math.sin(now/1100+i*2)*.4;u.head.rotation.z=Math.sin(now/700+i)*.12;u.head.rotation.x=(u.hxb||0)+Math.sin(now/900+i)*.06;const bl=((now+i*1300)%3600)<120?.1:1;u.eyes.forEach(e=>e.m.scale.y=e.sy*bl)});
    });
    R.render(sc,pc);
   }catch(e){fail(e)}
