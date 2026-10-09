@@ -373,7 +373,7 @@ function step(){
  if(Math.random()<.012)snd(2000+Math.random()*900,.07,'sine',.025,Math.random()*2-1);
  sal.roll-=dt;
  if(!sal.active&&sal.roll<=0){sal.roll=SAL_EVERY;if(power>0&&Math.random()<SAL_CHANCE){sal.active=true;sal.side=['L','R'][Math.floor(Math.random()*2)];sal.wait=0;sal.blk=0;}}
- if(sal.active){sal.wait+=dt;if(closed[sal.side]&&power>0){sal.blk+=dt;if(sal.blk>2.5){sal.active=false;power=Math.min(100,power+8)}}else if(sal.wait>atkWait()){scare(sal);return}}
+ if(sal.active){sal.wait+=dt;if(closed[sal.side]&&power>0){sal.blk+=dt;if(sal.blk>6){sal.active=false;power=Math.min(100,power+8)}}else if(sal.wait>atkWait()){scare(sal);return}}
  // Aziz (Foxy style): sleeps in his cage on CAM 7, escapes if you stop watching, sprints to a door
  if(power>0){const wch=cam&&camSel===6,pan={L:-1,V:0,R:1}[pk.side];
   if(pk.run>0){pk.rt-=dt;pk.bang-=dt;if(pk.bang<=0){pk.bang=.28;const near=1-Math.max(0,pk.rt)/pk.RL;snd(85,.08,'square',.05+near*.2,pan*(.3+near*.7))}
@@ -423,11 +423,12 @@ snowfl.scr=Math.max(0,snowfl.scr-dt);
    if(can&&Math.random()<aggr(b)*1.2*(wt?1:.22)){b.pos++;if(b.pos===2)b.side=rndSide();if(b.pos===3){b.wait=0;}}else if(b.pos===2&&Math.random()<(b.rule==='watched'?.7:.35)||b.pos===1&&b.rule==='watched'&&Math.random()<.7)b.side=rndSide();
   }
   if(b.pos===3){
-   b.wait+=dt;
+   const cl=closed[b.side]&&power>0;if(!cl)b.wait+=dt;
    if(b.rule==='watched'){b.hop=(b.hop||0)+dt;if(b.hop>1.4){b.hop=0;if(Math.random()<.4){const ns=rndSide();if(ns!==b.side){b.side=ns;b.wait=0}}}}
    if(closed[b.side]&&power>0){
-    if(b.wait>4.2+(night-1)*.5){b.pos=b.hunter?1:(Math.random()<.5?0:1);b.side=rndSide();b.wait=0;b.cd=5}
-   }else if(b.wait>atkWait()){scare(b);return}
+    b.blk=(b.blk||0)+dt;if(!b.lim)b.lim=Math.max(6,10+Math.random()*5-(night-1)*.5);
+    if(b.blk>b.lim){b.blk=0;b.lim=0;b.pos=b.hunter?1:(Math.random()<.5?0:1);b.side=rndSide();b.wait=0;b.cd=5}
+   }else{b.blk=0;if(b.wait>atkWait()){scare(b);return}}
   }
  });
  render();
