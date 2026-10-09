@@ -208,6 +208,13 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 @keyframes zm2{from{transform:scale(.08)}to{transform:scale(2.6)}}
 #scare .bimg+.bimg{position:absolute;mix-blend-mode:screen;opacity:.6;filter:hue-rotate(140deg) contrast(2);animation:zm2 .2s forwards,gh .07s infinite alternate}
 @keyframes gh{from{margin-left:-24px}to{margin-left:24px}}
+#pause{position:absolute;inset:0;background:rgba(0,0,0,.82);display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:60;font-family:Arial,sans-serif;text-align:center}
+#pause.on{display:flex}
+#pause h2{margin:0 0 14px;font:400 clamp(30px,6vw,52px) Arial;color:#ddd;letter-spacing:4px}
+#pause button{background:none;border:0;color:#eee;font:400 clamp(20px,3.4vw,28px) Arial;padding:8px 24px;cursor:pointer;display:block}
+#pause button:hover,#pause button:focus-visible{color:#fff;text-shadow:0 0 12px #fff;outline:0}
+#pause button::before{content:'>> ';opacity:0}#pause button:hover::before,#pause button:focus-visible::before{opacity:1}
+#pause small{color:#8c8;font-size:15px;min-height:20px;margin-top:10px}
 </style></head><body>
 <div id="app">
  <div id="hud"><div id="clockbox"><b id="clock">12 AM</b><span>Night <b id="n">1</b></span></div></div>
@@ -234,6 +241,7 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
   <div id="ov"></div>
   <div id="scare"></div>
   <div id="card"></div>
+  <div id="pause"><h2>PAUSED</h2><button id="pResume">Resume</button><button id="pSave">Save Game</button><button id="pExit">Exit</button><small id="pMsg"></small></div>
   <div id="eyes"><i></i><i></i></div>
   <div id="title"><canvas id="tstatic"></canvas><img id="tbird" alt=""><div id="tmenu"><div id="tstar"></div><h1>5<br>Nights<br>At<br>Birdies</h1><button id="tnew">New Game</button><button id="tcont">Continue</button><button id="tinstall" style="display:none">Install App</button><div id="tnight"></div></div></div>
  </div>
@@ -315,10 +323,10 @@ function menu(){
  state='menu';clearInterval(loop);$('ov').classList.remove('on');
  const T=$('title');T.classList.add('on');$('app').classList.add('inmenu');
  const sn=savedNight();
- $('tcont').style.display=sn>1?'block':'none';$('tnight').style.display=sn>1?'block':'none';$('tnight').textContent='Night '+sn;
+ const sv=getSave();$('tcont').style.display=(sn>1||sv)?'block':'none';$('tnight').style.display=(sn>1||sv)?'block':'none';$('tnight').textContent='Night '+(sv?sv.night:sn);
  $('tstar').textContent=allDone()?'★':'';
  $('tnew').onclick=()=>{hideTitle();saveNight(1);intro(1)};
- $('tcont').onclick=()=>{hideTitle();intro(sn)};
+ $('tcont').onclick=()=>{hideTitle();if(sv){loadGame(sv)}else intro(sn)};
  const cs=$('tstatic'),cx=cs.getContext('2d');cs.width=128;cs.height=80;
  const noise=a=>{const im=cx.createImageData(128,80),d=im.data;for(let k=0;k<d.length;k+=4){const v=Math.random()*255|0;d[k]=d[k+1]=d[k+2]=v;d[k+3]=a}cx.putImageData(im,0,0)};
  clearInterval(tIv);tShown=-1;tCur=0;tBurst=0;tSwitch=0;
@@ -491,7 +499,7 @@ function render(){
  if(power>0)$('msg').textContent=pk.at?'🚨 AZIZ IS AT THE DOOR! CLOSE IT!':pk.run>0?'🏃 AZIZ ESCAPED! LISTEN FOR HIS FOOTSTEPS!':camLock?'📷 CAMERA BATTERY DEAD — RECHARGING…':'';
 }
 
-let lastAct=0;const gate=()=>{const n=performance.now();if(n-lastAct<220)return false;lastAct=n;return true};
+let lastAct=0;const gate=()=>{if(paused)return false;const n=performance.now();if(n-lastAct<220)return false;lastAct=n;return true};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(b)b.blur()});
 document.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')e.preventDefault()});
 function light(k){if(state!=='play'||power<=0||!gate())return;const on=!lit[k];lit={L:false,V:false,R:false};lit[k]=on;snd(on?900:500,.05,'sine',.08);render()}
@@ -509,7 +517,22 @@ tap('lure',doLure);
 (()=>{const mk=(id,kids)=>{const d=document.createElement('div');d.id=id;kids.forEach(k=>d.appendChild($(k)));$('app').appendChild(d)};
  $('kL').textContent='DOOR';$('kR').textContent='DOOR';$('lL').textContent='LIGHT';$('lR').textContent='LIGHT';$('kC').innerHTML='▲ ▲ ▲ ▲ ▲';
  mk('pL',['kL','lL']);mk('pR',['kR','lR']);mk('camBar',['kC'])})();
-document.addEventListener('keydown',e=>{if(e.repeat)return;const m={a:'L',d:'R',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(m)toggle(m);const lm={'1':'L','2':'R'}[e.key];if(lm)light(lm);if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();camToggle()}});
+
+// ===== pause menu (Esc / P): Resume, Save Game, Exit =====
+let paused=false;
+const SAVEK='fnab_save';
+const getSave=()=>{try{const v=JSON.parse(localStorage.getItem(SAVEK)||'null');return v&&v.night?v:null}catch(e){return null}};
+function saveGame(){try{const d={night,hour,t,power,camBat,fanOn,birds:BIRDS.map(b=>[b.pos,b.side,b.wait||0,b.cd||0,b.mv||0]),pk:[pk.stage,pk.tm,pk.need,pk.hits]};localStorage.setItem(SAVEK,JSON.stringify(d));saveNight(Math.max(night,savedNight()));return true}catch(e){return false}}
+function loadGame(d){start(d.night);hour=d.hour;t=d.t;power=d.power;camBat=d.camBat;fanOn=d.fanOn;
+ BIRDS.forEach((b,i)=>{const v=d.birds[i];if(v){b.pos=v[0];b.side=v[1];b.wait=v[2];b.cd=v[3];if(v[4])b.mv=v[4]}});
+ if(d.pk){pk.stage=d.pk[0];pk.tm=d.pk[1];pk.need=d.pk[2];pk.hits=d.pk[3]}render()}
+function pauseGame(){if(state!=='play'||paused)return;if($('scare').classList.contains('on')||$('card').style.display==='flex')return;paused=true;clearInterval(loop);try{ac&&ac.suspend()}catch(e){}$('pMsg').textContent='';$('pause').classList.add('on');try{$('pResume').focus()}catch(e){}}
+function resumeGame(){if(!paused)return;paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}clearInterval(loop);loop=setInterval(step,100)}
+$('pResume').onclick=resumeGame;
+$('pSave').onclick=()=>{$('pMsg').textContent=saveGame()?'Game saved. (Night '+night+', '+(hour===0?12:hour)+' AM)':'Could not save.'};
+$('pExit').onclick=()=>{paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}stopMB();menu();try{window.close()}catch(e){}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(e.repeat)return;e.preventDefault();paused?resumeGame():pauseGame()}},true);
+document.addEventListener('keydown',e=>{if(e.repeat||paused)return;const m={a:'L',d:'R',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(m)toggle(m);const lm={'1':'L','2':'R'}[e.key];if(lm)light(lm);if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();camToggle()}});
 
 const AC=()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();return ac};
 function noiseBurst(d,v){try{const a=AC(),n=a.sampleRate*d|0,bf=a.createBuffer(1,n,a.sampleRate),c=bf.getChannelData(0);for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*Math.pow(1-i/n,1.5);const src=a.createBufferSource();src.buffer=bf;const g=a.createGain();g.gain.value=v;src.connect(g);g.connect(a.destination);src.start()}catch(e){}}
@@ -531,7 +554,7 @@ function scare(b){
 }
 
 function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(Math.min(5,night+1))}catch(e){}
- state='won';clearInterval(loop);
+ state='won';clearInterval(loop);try{localStorage.removeItem('fnab_save')}catch(e){}
  snd(523,.3,'sine',.15);setTimeout(()=>snd(659,.3,'sine',.15),250);setTimeout(()=>snd(784,.5,'sine',.15),500);
  card('5 AM &rarr; 6 AM','',3200,()=>{
  if(night>=5)overlay('6 AM — You survived!','All five nights done. The sun is up and the birds are asleep… for now. 🐤','Main menu',()=>menu());
