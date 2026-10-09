@@ -225,7 +225,9 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;touch
 @media (orientation:portrait) and (pointer:coarse){#rot{display:flex}}
 @media (max-height:480px){#camname{font-size:20px!important}#camsub{font-size:11px!important}#camtabs{bottom:66px!important;width:min(230px,42vw)!important}#camtabs button{padding:3px 2px!important}}
 @supports(padding:max(0px)){#camtabs{right:max(12px,env(safe-area-inset-right))}}
+#offl{display:none;position:fixed;left:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:12px Arial;color:#6c6;opacity:.8;pointer-events:none}
 </style></head><body>
+<div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
  <div id="hud"><div id="clockbox"><b id="clock">12 AM</b><span>Night <b id="n">1</b></span></div></div>
@@ -329,7 +331,9 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e;co
 window.addEventListener('appinstalled',()=>{instEv=null;const b=$('tinstall');if(b)b.style.display='none'});
 $('tinstall').onclick=()=>{if(instEv){instEv.prompt();instEv=null;$('tinstall').style.display='none'}};
 if(window.matchMedia&&matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches)$('tinstall').remove();
-if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});
+ try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+ navigator.serviceWorker.ready.then(()=>caches.open('birdies-v5').then(c=>c.match('index.html')).then(h=>{if(h){const o=document.getElementById('offl');if(o)o.style.display='block'}})).catch(()=>{})});
 function hideTitle(){$('app').classList.remove('inmenu');$('title').classList.remove('on');clearInterval(tIv);tIv=0}
 function menu(){
  state='menu';clearInterval(loop);$('ov').classList.remove('on');
