@@ -237,7 +237,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 19 (decorations)</div>
+<div id="ver">version 20 (office decor)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -703,7 +703,7 @@ function init3D(){
  const blades=new THREE.Group();blades.position.z=.01;fanHead.add(blades);
  for(let k=0;k<4;k++){const pv=new THREE.Group();pv.rotation.z=k*Math.PI/2;const bl=new THREE.Mesh(new THREE.SphereGeometry(.08,10,8),MT(0x6aa0d0));bl.position.set(0,.085,0);bl.scale.set(.55,1.4,.14);bl.rotation.y=.5;pv.add(bl);blades.add(pv)}
  const fanHit=new THREE.Mesh(new THREE.CircleGeometry(.2,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));fanHit.position.z=.07;fanHead.add(fanHit);fanHit.userData.fan=1;clicks.push(fanHit);
- let fspin=0;
+ let fspin=0,mobile=null;
  // filing cabinet
  bx(.62,1.3,.5,MT(0x4a5058),-2.2,.65,-3.65);
  [.3,.65,1.0].forEach(y=>{bx(.54,.3,.02,MT(0x3e434a),-2.2,y,-3.39);bx(.16,.03,.03,MTL(0xbbbbbb),-2.2,y+.06,-3.36)});
@@ -721,6 +721,40 @@ function init3D(){
  function board(list){list.slice(0,6).forEach((o,k)=>{const im=imgs[o.name];if(!im)return;const tx=new THREE.Texture(im);tx.needsUpdate=true;const col=k%3,row=Math.floor(k/3),z=-2.3+(col-1)*.5,y=1.62-row*.42;
   const w=new THREE.Mesh(new THREE.PlaneGeometry(.37,.37),new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:1}));w.position.set(2.488,y,z);w.rotation.y=-Math.PI/2;sc.add(w);
   const ph=new THREE.Mesh(new THREE.PlaneGeometry(.32,.32),new THREE.MeshStandardMaterial({map:tx,roughness:1}));ph.position.set(2.484,y,z);ph.rotation.y=-Math.PI/2;sc.add(ph)})}
+ // ---- extra office decorations ----
+ {const ball=(r,c,x,y,z,sx,sy,sz)=>{const q=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),MT(c));q.position.set(x,y,z);q.scale.set(sx||1,sy||1,sz||1);sc.add(q);return q};
+  // calendar + framed pictures on back wall
+  paper(()=>['OCT','1 2 3 4 5','6 7 8 9 10','X X X'],'#ece6d0',.45,.6,1.0,2.4,-3.93,0,0,.04);
+  const frame=(w,h,x,y,z,ry,draw)=>{bx(w+.08,h+.08,.03,MT(0x4a321e),x,y,z,ry);const t=cvt(128,Math.round(128*h/w),draw);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:t,roughness:1}));m.position.set(x+(ry?Math.sin(ry)*.02:0),y,z+(ry?Math.cos(ry)*.02:.02));m.rotation.y=ry||0;sc.add(m)};
+  frame(.5,.4,-2.2,2.5,-3.93,0,(g,W,H)=>{g.fillStyle='#7ab0d8';g.fillRect(0,0,W,H);g.fillStyle='#3a8a4a';g.fillRect(0,H*.7,W,H);g.fillStyle='#ffe070';g.beginPath();g.arc(W*.8,H*.2,14,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.ellipse(W*.4,H*.55,18,12,0,0,7);g.fill();g.beginPath();g.arc(W*.52,H*.45,9,0,7);g.fill()});
+  frame(.45,.55,2.0,.0+2.6,-3.93,0,(g,W,H)=>{g.fillStyle='#2a2a3a';g.fillRect(0,0,W,H);g.fillStyle='#ffd070';g.font='bold 15px sans-serif';g.textAlign='center';g.fillText('WINGFIELD',W/2,30);g.fillText('SANCTUARY',W/2,50);g.fillStyle='#e04a4a';g.beginPath();g.arc(W/2,H*.62,22,0,7);g.fill();g.fillStyle='#ffd070';g.beginPath();g.arc(W/2+8,H*.58,5,0,7);g.fill()});
+  // side-wall posters (front half of room)
+  [[2.55,2.9,-Math.PI/2],[-2.55,2.7,Math.PI/2]].forEach((a,i)=>paper(()=>i?['WASH','YOUR','WINGS']:['SEEDS','ARE NOT','CURRENCY'],i?'#c8d8e0':'#e8d8b0',.7,.9,a[0],1.7,a[1],0,a[2],i?-.04:.05));
+  paper(()=>['FIRE','EXIT','→'],'#d8c8c0',.6,.5,2.55,1.9,1.4,0,-Math.PI/2,0);
+  // bunting across the back wall and left wall
+  {const cols=[0xe04a4a,0xf0c030,0x3a9ae0,0x4ac060,0xe070c0];for(let k=0;k<13;k++){const t=k/12,x=-2.5+5*t,y=2.95-Math.sin(t*Math.PI)*.3;const f=new THREE.Mesh(new THREE.ConeGeometry(.1,.22,3),new THREE.MeshStandardMaterial({color:cols[k%5],roughness:.8,emissive:cols[k%5],emissiveIntensity:.2}));f.rotation.set(Math.PI,Math.PI/2,0);f.position.set(x,y-.1,-3.9);sc.add(f)}
+   for(let k=0;k<14;k++){const t=k/13,c=[0xffd070,0xff8080,0x80d0ff,0xa0ff90][k%4];const b=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),new THREE.MeshBasicMaterial({color:c}));b.position.set(2.5-.04,3.02-Math.sin(t*Math.PI)*.22,3.5-t*7.2);sc.add(b);const b2=b.clone();b2.position.x=-2.5+.04;sc.add(b2)}}
+  // bird mobile hanging from the ceiling over the rug
+  {const mob=new THREE.Group();mob.position.set(0,3.2,-.4);sc.add(mob);const ring=new THREE.Mesh(new THREE.TorusGeometry(.4,.01,6,28),MTL(0xc9a24a));ring.rotation.x=Math.PI/2;ring.position.y=-.55;mob.add(ring);
+   [0xe8c030,0x4a9ae0,0x4ac060,0xe05a5a,0xf0f0f0].forEach((c,k)=>{const a=k/5*Math.PI*2,x=Math.sin(a)*.4,z=Math.cos(a)*.4,ln=.3+(k%3)*.12;const st=new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,ln,4),MTL(0xcccccc));st.position.set(x,-.55-ln/2,z);mob.add(st);const bd=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),MT(c));bd.position.set(x,-.55-ln-.05,z);bd.scale.set(1,.9,1.3);mob.add(bd);const hd=new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),MT(c));hd.position.set(x,-.55-ln,z+.07);mob.add(hd);const bk=new THREE.Mesh(new THREE.ConeGeometry(.015,.04,6),MT(0xe08020));bk.rotation.x=Math.PI/2;bk.position.set(x,-.55-ln,z+.12);mob.add(bk)});
+   const sp=new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,.55,4),MTL(0xcccccc));sp.position.y=-.27;mob.add(sp);for(let k=0;k<3;k++){const l=new THREE.Mesh(new THREE.CylinderGeometry(.002,.002,.5,3),MTL(0xcccccc));l.position.set(0,-.5,0);l.rotation.z=Math.PI/2;l.rotation.y=k*Math.PI/3;mob.add(l)}
+   mobile=mob}
+  // desk clutter
+  bx(.28,.05,.2,MT(0xece6d0),-.55,.9,-2.0,.2);bx(.28,.03,.2,MT(0xd9d3bf),-.54,.935,-2.0,-.1);bx(.28,.03,.2,MT(0xe3dcb0),-.55,.96,-2.0,.35);
+  [[-.45,1.2,0xffee66,.1],[.5,1.7,0xff99cc,-.1],[.48,1.55,0x88ddff,.15]].forEach(a=>{const q=bx(.1,.1,.005,MT(a[2]),a[0],a[1],-2.05,a[3]);q.position.z=-2.054});
+  cyl(.05,.05,.12,MT(0x2a6a9a),.45,.97,-1.3);ball(.05,0xffe040,.45,1.07,-1.3,1,.9,1);ball(.03,0xffe040,.47,1.12,-1.27);bx(.025,.012,.02,MT(0xe07020),.47,1.118,-1.245);
+  ball(.07,0xffd040,-.9,.94,-1.35,1,.85,1.2);ball(.045,0xffd040,-.9,.99,-1.3);bx(.02,.012,.02,MT(0xe07020),-.9,.99,-1.265);
+  {const sg=new THREE.Mesh(new THREE.SphereGeometry(.07,14,12),new THREE.MeshStandardMaterial({color:0xaad8ff,transparent:true,opacity:.35,roughness:.1}));sg.position.set(.8,1.0,-1.55);sc.add(sg);cyl(.06,.075,.04,MT(0x5a3a1a),.8,.93,-1.55)}
+  bx(.2,.08,.16,MT(0x2a2d34),-.3,.94,-1.5);bx(.16,.02,.05,MT(0x3a3d48),-.3,.995,-1.5);cyl(.012,.012,.06,MT(0x3a3d48),-.3,.99,-1.43);
+  {const sc2=bx(.22,.1,.14,MT(0x6a4a2a),1.15,.9,-2.3);cyl(.02,.02,.05,MT(0x6a4a2a),1.15,.97,-2.3)}
+  // cabinet top radio + box stack + water cooler + extra crates
+  bx(.32,.16,.14,MT(0x5a3a22),-2.2,1.38,-3.65);cyl(.05,.05,.02,MT(0x1a1a1a),-2.28,1.38,-3.57).rotation.x=Math.PI/2;cyl(.05,.05,.02,MT(0x1a1a1a),-2.12,1.38,-3.57).rotation.x=Math.PI/2;cyl(.004,.004,.4,MTL(0xbbbbbb),-2.05,1.62,-3.65).rotation.z=-.4;
+  bx(.5,.35,.4,MT(0x8a6a3a),1.1,.18,-3.7);bx(.45,.3,.38,MT(0x7a5a2e),1.12,.5,-3.7,.2);bx(.4,.28,.36,MT(0x9a7a42),1.0,.82,-3.7,-.15);bx(.4,.3,.38,MT(0x8a6a3a),1.62,.15,-3.68,.1);
+  cyl(.15,.15,.55,MT(0xdde4ea),-2.05,.28,-.6+3.1);cyl(.13,.13,.35,MT(0x9ac8e8,{transparent:true,opacity:.55}),-2.05,.72,2.5);
+  // fairy-light flower pots on windowless corners & floor items
+  bx(.7,.02,.5,MT(0x6a2a2a),2.0,.012,-2.2,.2);ball(.12,0xd8b060,1.9,.08,-2.2,1.3,.5,1);cyl(.09,.09,.3,MT(0x6a6e76),-2.4,.15,2.2);
+  [0,1,2,3,4].forEach(k=>{const q=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,.3+k*.04,4),MT(0x2e7a3a));q.position.set(-2.4+(k-2)*.025,.38,2.2);q.rotation.z=(k-2)*.2;sc.add(q);ball(.025,[0xe04a4a,0xf0c030,0xe070c0][k%3],-2.4+(k-2)*.05,.56+k*.01,2.2)});
+ }
  // doors
  const WS={};
  const HM=(()=>{
@@ -1271,6 +1305,7 @@ const FEA=(()=>{
    const k=Math.min(1,dt*8);yaw+=(ty-yaw)*k;pitch+=(tp-pitch)*k;pc.rotation.set(pitch,yaw,0);pc.position.x=Math.sin(now/2300)*.012;pc.position.y=1.5+Math.sin(now/1700)*.01;
    const pw=power>0;lamp.intensity=pw?.9+Math.random()*.06:0;fixM.color.setHex(pw?(Math.random()<.02?0x887755:0xfff0c8):0x222222);dlamp.intensity=pw?.5:0;bulb.material.color.setHex(pw?0xffe9a8:0x333333);amb.intensity=pw?.45:.1;
    mt+=dt;if(mt>.4){mt=0;monT.draw();clockT.draw()}if(ln!==night){ln=night;logT.draw()}
+   if(mobile)mobile.rotation.y=now/3000;
    fspin+=((fanOn&&pw?1:0)-fspin)*Math.min(1,dt*1.5);blades.rotation.z+=fspin*dt*24;if(fspin>.05)fanHead.rotation.y=Math.sin(now/1600)*.55*Math.min(1,fspin);
    ['L','R'].forEach(s=>{const W=WS[s];
     W.sh.position.y+=((closed[s]?0:2.5)-W.sh.position.y)*Math.min(1,dt*9);W.cap.position.x=W.bx+W.d*(closed[s]?.06:.085);W.cap.material.emissiveIntensity=closed[s]?1.6:.3;W.cap2.position.x=W.bx+W.d*(lit[s]?.06:.085);W.cap2.material.emissiveIntensity=lit[s]?1.6:.3;
