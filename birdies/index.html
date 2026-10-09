@@ -237,7 +237,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 15 (modes)</div>
+<div id="ver">version 16 (heads fixed)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -1069,7 +1069,7 @@ const FEA=(()=>{
    if(u.head){const H=u.head;
     if(!(t0<u.hn)||u.hn-t0>8){u.hn=t0+.3+Math.random()*(u.hyper?.5:2.6);const r=Math.random();
      u.hy=(Math.random()-.5)*(r<.25?1.9:1.1);u.hz=Math.random()<.3?(Math.random()<.5?-1:1)*(.35+Math.random()*.35):(Math.random()-.5)*.15;u.hx=(Math.random()-.5)*.3-.1}
-    const k=.3;H.rotation.y+=(u.hy-H.rotation.y)*k;H.rotation.z+=(u.hz-H.rotation.z)*k+(fe>.5&&t0-u.fz>.7?Math.sin(t0*48)*.22*fe:0);H.rotation.x+=(u.hx-H.rotation.x)*k;H.position.y=.43+Math.sin(t0*2.3+g.id)*.004}
+    const k=.3;H.rotation.y+=(u.hy-H.rotation.y)*k;H.rotation.z+=(u.hz-H.rotation.z)*k+(fe>.5&&t0-u.fz>.7?Math.sin(t0*48)*.22*fe:0);H.rotation.x+=(u.hx-H.rotation.x)*k;if(u.head0===undefined)u.head0=H.position.y;H.position.y=u.head0+Math.sin(t0*2.3+g.id)*.004}
    if(u.wings){const fl=u.mvg?Math.abs(Math.sin(t0*24)):0,tw=Math.max(0,Math.sin(t0*.37+g.id*3)-.97)*12;
     u.wings.forEach((w,i)=>{const sx=i?1:-1,tz=sx*(fl*1.1+fe*.12+tw*.08),tx=-fl*.5;w.rotation.z+=(tz-w.rotation.z)*.4;w.rotation.x+=(tx-w.rotation.x)*.4})}
    if(u.jaw){const ch=Math.max(0,Math.sin(t0*.23+g.id*5)-.9)*10;u.jaw.rotation.x=.55+(ch>0?Math.abs(Math.sin(t0*18))*.35*ch:0)}
