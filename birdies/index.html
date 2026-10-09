@@ -109,10 +109,10 @@ button.c:disabled{opacity:.3}
 #tmenu button:hover::before,#tmenu button:focus::before{content:'>> '}
 #tmenu button:hover{color:var(--gold)}
 #tnight{font:clamp(13px,3vw,17px) Georgia,serif;color:#9a9a92;margin:-2px 0 0 0}
-#tdiff{display:flex;align-items:center;gap:4px;margin:10px 0 6px;flex-wrap:wrap}
-#tdiff span{font:clamp(12px,2.6vw,15px) Arial,sans-serif;color:#9a9a92;margin-right:6px;letter-spacing:.08em;text-transform:uppercase}
-#tmenu #tdiff button{display:inline-block;font:700 clamp(13px,3vw,16px) Arial,sans-serif;padding:7px 12px;border:1px solid #55554f;border-radius:3px;color:#b9b7b0}
-#tmenu #tdiff button::before{content:none!important}
+#tdiff,#tvoice{display:flex;align-items:center;gap:4px;margin:10px 0 6px;flex-wrap:wrap}
+#tdiff span,#tvoice span{font:clamp(12px,2.6vw,15px) Arial,sans-serif;color:#9a9a92;margin-right:6px;letter-spacing:.08em;text-transform:uppercase}
+#tmenu #tdiff button,#tmenu #tvoice button{display:inline-block;font:700 clamp(13px,3vw,16px) Arial,sans-serif;padding:7px 12px;border:1px solid #55554f;border-radius:3px;color:#b9b7b0}
+#tmenu #tdiff button::before,#tmenu #tvoice button::before{content:none!important}
 #tmenu #tdiff button.on{color:#111;border-color:transparent}
 #clockbox #dmode{font-weight:700}
 #tstar{font-size:22px;color:var(--gold);height:26px}
@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 28 (telephone)</div>
+<div id="ver">version 29 (phone voice)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -269,7 +269,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
   <button id="pbtn" aria-label="Pause">❚❚</button>
   <div id="pause"><h2>PAUSED</h2><button id="pResume">Resume</button><button id="pSave">Save Game</button><button id="pMenu">Exit to Main Menu</button><small id="pMsg"></small></div>
   <div id="eyes"><i></i><i></i></div>
-  <div id="title"><canvas id="tstatic"></canvas><img id="tbird" alt=""><div id="tmenu"><div id="tstar"></div><h1>5<br>Nights<br>At<br>Birdies</h1><button id="tnew">New Game</button><button id="tcont">Continue</button><div id="tdiff"><span>Mode</span><button data-d="0">Easy</button><button data-d="1">Medium</button><button data-d="2">Hard</button></div><button id="tinstall" style="display:none">Install App</button><div id="tnight"></div></div></div>
+  <div id="title"><canvas id="tstatic"></canvas><img id="tbird" alt=""><div id="tmenu"><div id="tstar"></div><h1>5<br>Nights<br>At<br>Birdies</h1><button id="tnew">New Game</button><button id="tcont">Continue</button><div id="tdiff"><span>Mode</span><button data-d="0">Easy</button><button data-d="1">Medium</button><button data-d="2">Hard</button></div><div id="tvoice"><span>Phone voice</span><button id="tvb">Auto</button><button id="tvp">Low</button></div><button id="tinstall" style="display:none">Install App</button><div id="tnight"></div></div></div>
  </div>
  <div id="phcap"><b>📞 NIGHT GUARD</b><span id="phtxt"></span></div><button id="phbtn">📞 Answer</button>
  <div id="msg"></div>
@@ -366,6 +366,9 @@ function menu(){
  document.querySelectorAll('#tdiff button').forEach(b=>b.onclick=()=>{setDiff(+b.dataset.d);paintDiff();snd(440+diff*110,.08,'square',.05);
   if(sv)$('tnight').textContent='Night '+sv.night+' · saved on '+DIFF[sv.diff!==undefined?sv.diff:1].n});
  paintDiff();if(sv)$('tnight').textContent='Night '+sv.night+' · saved on '+DIFF[sv.diff!==undefined?sv.diff:1].n;
+ pickVoice();voiceUI();
+ $('tvb').onclick=()=>{const v=enVoices();if(!v.length){snd(150,.1,'square',.08);return}const names=['',...v.map(x=>x.name)],cur=Math.max(0,names.indexOf(lsG('fnab_voice','')));lsS('fnab_voice',names[(cur+1)%names.length]);ttsSample();voiceUI()};
+ $('tvp').onclick=()=>{lsS('fnab_pitch',String((+lsG('fnab_pitch','1')+1)%PITCH.length));ttsSample();voiceUI()};
  $('tnew').onclick=()=>{hideTitle();saveNight(1);intro(1)};
  $('tcont').onclick=()=>{hideTitle();if(sv){loadGame(sv)}else intro(sn)};
  const cs=$('tstatic'),cx=cs.getContext('2d');cs.width=128;cs.height=80;
@@ -407,14 +410,21 @@ const vent={b:null,t:0,wait:0,blk:0,roll:8,crawl:5,k:0,cl:0};
 const phone={st:'idle',t:0,n:1,txt:[],dur:[],total:0,spk:false,rb:0};
 const phoneText=n=>NIGHT_MSG[n-1].replace(/<br>[\s\S]*$/,'').replace(/<[^>]+>/g,'').replace(/^\s*"|"\s*$/g,'').replace(/\s+/g,' ').trim();
 let ttsVoice=null;
-const pickVoice=()=>{try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));ttsVoice=v.find(x=>/daniel|david|alex|guy|mark|male|fred|arthur|rishi/i.test(x.name))||v.find(x=>/en-(US|GB)/i.test(x.lang))||v[0]||null}catch(e){}};
+const lsG=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}},lsS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const PITCH=[['Deep',.45],['Low',.7],['Normal',1],['High',1.35]];
+const enVoices=()=>{try{return speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang))}catch(e){return[]}};
+const pickVoice=()=>{try{const v=enVoices(),want=lsG('fnab_voice','');ttsVoice=(want&&v.find(x=>x.name===want))||v.find(x=>/daniel|david|alex|guy|mark|male|fred|arthur|rishi/i.test(x.name))||v.find(x=>/en-(US|GB)/i.test(x.lang))||v[0]||null}catch(e){}};
+const ttsPitch=()=>{const i=+lsG('fnab_pitch','1');return PITCH[i>=0&&i<PITCH.length?i:1][1]};
+function ttsSample(){try{speechSynthesis.cancel();pickVoice();const u=new SpeechSynthesisUtterance('Hello? Welcome to Wingfield. Have a tweet night.');if(ttsVoice){u.voice=ttsVoice;u.lang=ttsVoice.lang}u.rate=.95;u.pitch=ttsPitch();speechSynthesis.speak(u)}catch(e){}}
+function voiceUI(){const v=enVoices(),want=lsG('fnab_voice',''),b=$('tvb'),p=$('tvp');if(!b)return;b.textContent=want||(ttsVoice?'Auto: '+ttsVoice.name.replace(/Microsoft |Google /,'').slice(0,18):'Auto');p.textContent=PITCH[+lsG('fnab_pitch','1')][0]}
+
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 function ttsUnlock(){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
 function phoneStart(n){phoneStop();phone.st='ring';phone.t=0;phone.n=n;phone.spk=false;phone.rb=0;
  phone.txt=phoneText(n).split(/(?<=[.!?])\s+/).filter(Boolean);phone.dur=phone.txt.map(x=>Math.max(1.6,x.length*.068+.4));phone.total=phone.dur.reduce((a,b)=>a+b,0);
  const b=$('phbtn');b.style.display='block';b.className='ring';b.textContent='📞 Answer'}
 function phoneStop(){phone.st='idle';try{speechSynthesis.cancel()}catch(e){}phone.spk=false;try{$('phcap').style.display='none';$('phbtn').style.display='none'}catch(e){}}
-function phoneTalk(){phone.st='talk';phone.t=4.2;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(phone.txt.join(' '));if(!ttsVoice)pickVoice();if(ttsVoice)u.voice=ttsVoice;u.lang=ttsVoice?ttsVoice.lang:'en-US';u.rate=.95;u.pitch=.7;u.volume=1;u.onstart=()=>{phone.spk=true};u.onend=()=>{phone.spk=false};u.onerror=()=>{phone.spk=false};speechSynthesis.speak(u)}catch(e){}
+function phoneTalk(){phone.st='talk';phone.t=4.2;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(phone.txt.join(' '));if(!ttsVoice)pickVoice();if(ttsVoice)u.voice=ttsVoice;u.lang=ttsVoice?ttsVoice.lang:'en-US';u.rate=.95;u.pitch=ttsPitch();u.volume=1;u.onstart=()=>{phone.spk=true};u.onend=()=>{phone.spk=false};u.onerror=()=>{phone.spk=false};speechSynthesis.speak(u)}catch(e){}
  const b=$('phbtn');b.className='';b.textContent='📵 Hang up'}
 function phoneBtn(){if(phone.st==='ring'){snd(300,.1,'sine',.1);phoneTalk()}else if(phone.st==='talk'){snd(200,.15,'square',.1);phoneStop()}}
 function phoneStep(dt){if(phone.st==='idle')return;phone.t+=dt;
