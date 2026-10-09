@@ -148,15 +148,15 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 #msg{position:absolute;left:0;right:0;bottom:70px;z-index:4;pointer-events:none;color:#f66;font:700 15px Arial;text-shadow:0 0 6px #000}
 #look{top:8px;bottom:auto}
 #pL,#pR{position:absolute;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:6px;padding:8px;background:#2a2a2a;border:2px solid #555;border-radius:6px}
-#pL{left:8px}#pR{right:8px}
+#pL{left:8px}#pR{right:8px}#pV{position:absolute;right:8px;bottom:18px;z-index:4;padding:8px;background:#2a2a2a;border:2px solid #555;border-radius:6px}#pV button.c{width:64px;height:58px;padding:0;border-radius:4px;border:3px solid #777;background:#1b1b1b;color:#ddd;font:700 12px Arial;letter-spacing:1px}#kV.on{background:#a01818;border-color:#e33;color:#fff}
 #pL button.c,#pR button.c{width:64px;height:58px;padding:0;border-radius:4px;border:3px solid #777;background:#1b1b1b;color:#ddd;font:700 12px Arial;letter-spacing:1px}
 #kL.on,#kR.on{background:#a01818;border-color:#e33;color:#fff}
 #lL.on,#lR.on{background:#e8e8e8;color:#111;border-color:#fff}
 #camBar{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;z-index:4;width:min(440px,56vw)}
 #camBar button.c{width:100%;height:42px;padding:0;background:rgba(190,190,190,.5);border:2px solid rgba(230,230,230,.7);border-radius:6px;color:#fff;letter-spacing:6px;font:700 15px Arial}
 #camBar button.c.on{background:rgba(120,120,120,.8)}
-#app.camopen #pL,#app.camopen #pR{display:none}
-#app.inmenu #pL,#app.inmenu #pR,#app.inmenu #camBar{display:none}
+#app.camopen #pL,#app.camopen #pR,#app.camopen #pV{display:none}
+#app.inmenu #pL,#app.inmenu #pR,#app.inmenu #pV,#app.inmenu #camBar{display:none}.lore{max-width:560px;margin:10px auto 0;padding:12px 16px;border-left:3px solid #b9984a;background:rgba(255,230,160,.06);text-align:left;color:#d9cfae;font:italic 15px/1.45 Georgia,serif}.lore b{display:block;font:700 13px Arial;letter-spacing:2px;color:#b9984a;font-style:normal;margin-bottom:4px}
 #cam{background:#101010;color:#ddd;font-family:Arial,Helvetica,sans-serif}
 #camview{filter:grayscale(.45) contrast(1.15)}
 #camname{font:400 clamp(18px,3vw,26px) Arial;top:12px;left:16px;color:#eee;text-shadow:0 0 4px #000}
@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 33 (exit button)</div>
+<div id="ver">version 34 (lore + vent button)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -337,10 +337,18 @@ const NIGHT_MSG=[
 `"The door cameras are glitchy because the birds peck the wires. Don't blame me. They are getting smarter, and apparently Silver can now open latches. Just kidding. Probably. Oh, and Abbas looks slow, but nobody knows when he will move. Keep checking on him."`,
 `"Final night. Snowflake is silent until you spot him. Then he screeches and charges, so look only when you must. If you are hearing this, I am either on vacation or I got out. Hold on until 6 AM, and the sanctuary opens to the public. The birds will go back to being adorable. Good luck."`
 ];
+const LORE=[
+['Night 1 — The Founder','Wingfield Bird Sanctuary was founded in 1987 by Dr. Edith Wingfield, who swore that birds remember every hand that ever fed them. She never took a day off. The sign over the aviary door still reads: "They are listening."'],
+['Night 2 — The Music Box','The music box in the basement was Edith\'s. She wound it every night at ten so Puffy would sleep. The week she retired, nobody wound it. The birds stopped sleeping the same week. Puffy has not forgiven anyone since.'],
+['Night 3 — The Vent','The ventilation shaft was dug in 1999 after Fries "went exploring" and was missing for nine days. The maintenance log says: NEVER seal the vent fully. The line below it is scratched out. Whoever scratched it out did it from the inside.'],
+['Night 4 — The Gold Cage','Aziz is the oldest bird in the sanctuary. Edith kept his cage right beside her bed. Every night he slips the latch and walks to her office. Nobody has had the heart to tell him she is not there. He does not stop looking.'],
+['Night 5 — The Last Guard','Edith\'s final note was found taped inside the office desk: "The birds are not angry. They are guarding. Years ago somebody came at night to steal them, and they have never forgotten. If you are reading this, they think you are that thief. Stay till 6, and be kind."']];
+const EPILOGUE='At 6 AM the birds drift back to their perches, one by one. A single green feather rests on your desk, and under it Edith\'s handwriting: "Welcome back, guard." Somewhere in the basement, a music box begins to play by itself — softly, this time.';
+const loreBox=(i,t)=>'<div class="lore"><b>📓 WINGFIELD JOURNAL · '+LORE[i][0].toUpperCase()+'</b>'+LORE[i][1]+'</div>';
 const ORD=['1st','2nd','3rd','4th','5th'];
 function card(l1,l2,ms,fn){const o=$('card');o.innerHTML='<div>'+l1+'</div>'+(l2?'<small>'+l2+'</small>':'');o.classList.add('on');$('app').classList.add('inmenu');setTimeout(()=>{o.classList.remove('on');$('app').classList.remove('inmenu');fn()},ms)}
 const begin=n=>{ttsUnlock();return card('12:00 AM',ORD[n-1]+' Night',2600,()=>start(n))};
-function intro(n){state='menu';overlay('Night '+n+' <span style="color:'+D().c+'">· '+D().n+'</span>','<i>📞 At midnight the phone on your desk will ring. Pick up and listen.</i>'+(n===1?'<br><br>'+HOWTO:''),'Begin Night '+n,()=>begin(n))}
+function intro(n){state='menu';overlay('Night '+n+' <span style="color:'+D().c+'">· '+D().n+'</span>','<i>📞 At midnight the phone on your desk will ring. Pick up and listen.</i>'+loreBox(n-1)+(n===1?'<br><br>'+HOWTO:''),'Begin Night '+n,()=>begin(n))}
 const HOWTO='You are the new night guard at Wingfield Bird Sanctuary. After midnight, the birds wake up — and they do NOT like visitors.<br><br>Survive until 6 AM. It is pitch dark: birds at the doors are <b>invisible</b> until you shine a light (keys 1/2), so listen for scratching in your left/right speakers. Close a door when a bird appears there. It is a 3D office: drag to look around, or use the look buttons. The desk fan runs all night: it costs a little power but gives you 1.5 extra seconds before a bird attacks. Click the red button next to a door to close it, and the green button below it to switch that light on. Watch the cameras — but the <b>Silver</b> only creeps while you <i>aren\'t</i> looking, the <b>Sugar</b> only while you <i>are</i>, and everything drains power.';
 const TBIRDS=()=>[BIRDS.find(b=>b.id==='abbas'),BIRDS.find(b=>b.id==='pika'),BIRDS.find(b=>b.id==='snowfl'),pf,sal];
 let tIv=0,tCur=0,tBurst=0,tShown=-1,tMain=0,tSwitch=0;
@@ -704,7 +712,7 @@ function doWind(){if(state!=='play'||!cam)return;pf.box=Math.min(100,pf.box+30);
 tap('wind',doWind);
 (()=>{const mk=(id,kids)=>{const d=document.createElement('div');d.id=id;kids.forEach(k=>d.appendChild($(k)));$('app').appendChild(d)};
  $('kL').textContent='DOOR';$('kR').textContent='DOOR';$('lL').textContent='LIGHT';$('lR').textContent='LIGHT';$('kV').textContent='VENT';$('kC').innerHTML='▲ ▲ ▲ ▲ ▲';
- mk('pL',['kL','lL','kV']);mk('pR',['kR','lR']);mk('camBar',['kC'])})();
+ mk('pL',['kL','lL']);mk('pV',['kV']);mk('pR',['kR','lR']);mk('camBar',['kC'])})();
 
 // ===== pause menu (Esc / P): Resume, Save Game, Exit =====
 let paused=false;
@@ -757,8 +765,8 @@ function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(M
  state='won';clearInterval(loop);phoneStop();try{if(runFromSave)localStorage.removeItem('fnab_save')}catch(e){}
  snd(523,.3,'sine',.15);setTimeout(()=>snd(659,.3,'sine',.15),250);setTimeout(()=>snd(784,.5,'sine',.15),500);
  card('5 AM &rarr; 6 AM','',3200,()=>{
- if(night>=5)overlay('6 AM — You survived!','All five nights done. The sun is up and the birds are asleep… for now. 🐤','Main menu',()=>menu());
- else overlay('6 AM',`Night ${night} survived. The birds will be angrier tomorrow.`,`Start Night ${night+1}`,()=>intro(night+1),1);
+ if(night>=5)overlay('6 AM — You survived!','All five nights done. The sun is up and the birds are asleep… for now. 🐤<div class="lore"><b>📓 WINGFIELD JOURNAL · EPILOGUE</b>'+EPILOGUE+'</div>','Main menu',()=>menu());
+ else overlay('6 AM',`Night ${night} survived. The birds will be angrier tomorrow.<br><small>📓 A new journal page is waiting for you.</small>`,`Start Night ${night+1}`,()=>intro(night+1),1);
  });
 }
 function init3D(){
