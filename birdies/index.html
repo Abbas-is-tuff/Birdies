@@ -237,7 +237,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 22 (power fix)</div>
+<div id="ver">version 23 (darker)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -409,8 +409,8 @@ function step(){
  // Puffy's music box: wind it or he escapes
  {const was=pf.box;pf.box=Math.max(0,pf.box-dt*100/Math.max(20,46-night*2.6)*D().box);
   if(pf.box>0){pf.grace=0;pf.mt-=dt;if(pf.mt<=0){const st=pf.n++%PFT.length,f=PFT[st],slow=1-pf.box/100,droop=Math.pow(2,-slow*slow*.5/12),near=cam&&camSel===5;
-   if(f)mbNote(f*droop,near?.11:.06,near);if(st%8===0)mbNote(PFB[(st/8|0)%PFB.length]*droop,near?.07:.04,near);
-   pf.mt=.19+slow*.22+(slow>.7?Math.random()*.12:0)}}
+   if(f&&near)mbNote(f*droop,.15,near);if(near&&st%8===0)mbNote(PFB[(st/8|0)%PFB.length]*droop,.12,near);
+   pf.mt=.3+slow*.3+(slow>.7?Math.random()*.15:0)}}
   else{if(was>0)snd(200,.3,'sawtooth',.12);pf.grace+=dt;if(pf.grace>1.5&&Math.random()<.2)snd(90+Math.random()*40,.12,'square',.06);if(pf.grace>=D().gr){scare(pf);return}}}
  // power
  if(power>0){
@@ -488,11 +488,11 @@ snowfl.scr=Math.max(0,snowfl.scr-dt);
 let blipT=0,mbIv=0,mbN=0;
 function blip(){const b=$('blip');b.classList.add('on');clearTimeout(blipT);blipT=setTimeout(()=>b.classList.remove('on'),170);snd(180,.12,'sawtooth',.05)}
 // Puffy's music box: an original minor-key tune played on a modelled steel comb (tine partials, pluck click, room damping)
-const PFT=[440,0,523.25,440,659.25,0,587.33,523.25,440,0,392,440,523.25,587.33,0,0,440,0,523.25,440,659.25,0,783.99,659.25,587.33,523.25,440,392,440,0,0,0];
-const PFB=[220,174.61,196,164.81];
-function mbNote(f,v,near){try{const a=AC(),t=a.currentTime,out=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=near?9000:1800;lp.Q.value=.3;out.gain.value=v;out.connect(lp);lp.connect(a.destination);
+const PFT=[440,0,415.3,440,523.25,0,466.16,440,349.23,0,329.63,0,311.13,329.63,0,0,440,0,415.3,440,523.25,0,622.25,587.33,523.25,466.16,440,0,349.23,0,0,0];
+const PFB=[110,116.54,103.83,98];
+function mbNote(f,v,near){try{const a=AC(),t=a.currentTime,out=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=near?5200:1200;lp.Q.value=.3;out.gain.value=v;out.connect(lp);lp.connect(a.destination);
  const dec=Math.min(2.6,1.1*440/f+.5);
- [[1,1,dec],[2.01,.18,dec*.45],[5.93,.12,dec*.12],[9.7,.05,.05]].forEach(([r,amp,d],i)=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f*r;o.detune.value=(Math.random()-.5)*6;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.05)});
+ [[1,1,dec],[1.0135,.7,dec*.9],[2.01,.18,dec*.45],[1.414,.1,dec*.3],[5.93,.12,dec*.12],[9.7,.05,.05]].forEach(([r,amp,d],i)=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f*r;o.detune.value=(Math.random()-.5)*6;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.05)});
  const n=a.createBufferSource(),b=a.createBuffer(1,a.sampleRate*.012|0,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*Math.pow(1-i/c.length,4);
  const hp=a.createBiquadFilter(),ng=a.createGain();hp.type='highpass';hp.frequency.value=3500;ng.gain.value=.35;n.buffer=b;n.connect(hp);hp.connect(ng);ng.connect(out);n.start(t)}catch(e){}}
 function mbClick(k){try{const a=AC(),t=a.currentTime+k*.045,n=a.createBufferSource(),b=a.createBuffer(1,a.sampleRate*.02|0,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*Math.pow(1-i/c.length,6);
@@ -643,7 +643,7 @@ function init3D(){
  const wall=MT(0x2a2d3a);
  bx(5.4,.1,8,MT(0x1a1c24),0,-.05,0);bx(5.4,.1,8,MT(0x15161d),0,3.2,0);
  bx(5.4,3.2,.1,wall,0,1.6,-4);bx(5.4,3.2,.1,wall,0,1.6,4);[-2.6,2.6].forEach(xw=>{bx(.1,3.2,3.2,wall,xw,1.6,-2.4);bx(.1,3.2,3.6,wall,xw,1.6,2.2);bx(.1,.8,1.2,wall,xw,2.8,-.2)});
- const amb=new THREE.AmbientLight(0x505878,.45);sc.add(amb);
+ const amb=new THREE.AmbientLight(0x404868,.2);sc.add(amb);
  const lamp=new THREE.PointLight(0xffd9a0,.9,8);lamp.position.set(0,2.5,-1);sc.add(lamp);
  // desk
  const wood=MT(0x4a3a26);
@@ -1095,7 +1095,7 @@ const FEA=(()=>{
  function buildCams(){
   cs=new THREE.Scene();cs.background=new THREE.Color(0x040404);cs.fog=new THREE.Fog(0x040404,7,30);
   cc=new THREE.PerspectiveCamera(62,1,.1,60);
-  cs.add(new THREE.AmbientLight(0x9098a8,.6));
+  cs.add(new THREE.AmbientLight(0x606878,.2));
   for(let i=0;i<3;i++){const l=new THREE.PointLight(0xffffff,0,10);cs.add(l);camLights.push(l)}
   const flo=cvt(128,128,(g,W,H)=>{g.fillStyle='#4a4d55';g.fillRect(0,0,W,H);g.fillStyle='#3a3d45';g.fillRect(0,0,W/2,H/2);g.fillRect(W/2,H/2,W/2,H/2)});flo.wrapS=flo.wrapT=THREE.RepeatWrapping;flo.repeat.set(6,6);
   const floorM=new THREE.MeshStandardMaterial({map:flo,roughness:.6}),wallM=MT(0x565b68),darkM=MT(0x24262d),woodM=MT(0x7a5634),metalM=MTL(0x8a8e96),goldM=MTL(0xc9a24a),lampM=new THREE.MeshBasicMaterial({color:0xfff0c8});
@@ -1217,7 +1217,7 @@ const FEA=(()=>{
   cc.lookAt(OX(r)+P[0]+ddx*c+ddz*s2,P[4],P[2]-ddx*s2+ddz*c);
   [3,4].forEach(rm=>{const d=camDoors[rm];if(!d)return;const tgt=(closed[rm===3?'L':'R']&&power>0)?1.2:3.7;d.position.y+=(tgt-d.position.y)*Math.min(1,dt*7)});
   if(cageDoor)cageDoor.rotation.y+=((pk.stage>=2?-1.9:0)-cageDoor.rotation.y)*Math.min(1,dt*5);
-  {const spec=RLS[r],fl=Math.random()<(r===5?.05:.012)?.35:1;camLights.forEach((l,i)=>{const q=spec[i];if(q){l.position.set(q[0],q[1],q[2]);l.color.setHex(q[3]);l.distance=q[5];l.intensity=q[4]*fl}else l.intensity=0})}
+  {const spec=RLS[r],fl=Math.random()<(r===5?.05:.012)?.35:1;camLights.forEach((l,i)=>{const q=spec[i];if(q){l.position.set(q[0],q[1],q[2]);l.color.setHex(q[3]);l.distance=q[5];l.intensity=q[4]*fl*.45}else l.intensity=0})}
   // ---- birds: placed per room, smoothly hopping between spots ----
   Object.values(CB).forEach(g=>g.visible=false);
   const lists=[[],[],[],[],[],[],[]];
@@ -1303,7 +1303,7 @@ const FEA=(()=>{
    camSnap=true;
    const w=view.clientWidth,h=view.clientHeight;if(w!==bw||h!==bh){bw=w;bh=h;R.setSize(w,h,false);pc.aspect=w/h;pc.updateProjectionMatrix()}
    const k=Math.min(1,dt*8);yaw+=(ty-yaw)*k;pitch+=(tp-pitch)*k;pc.rotation.set(pitch,yaw,0);pc.position.x=Math.sin(now/2300)*.012;pc.position.y=1.5+Math.sin(now/1700)*.01;
-   const pw=power>0;lamp.intensity=pw?.9+Math.random()*.06:0;fixM.color.setHex(pw?(Math.random()<.02?0x887755:0xfff0c8):0x222222);dlamp.intensity=pw?.5:0;bulb.material.color.setHex(pw?0xffe9a8:0x333333);amb.intensity=pw?.45:.1;
+   const pw=power>0;lamp.intensity=pw?.5+Math.random()*.06:0;fixM.color.setHex(pw?(Math.random()<.02?0x887755:0xfff0c8):0x222222);dlamp.intensity=pw?.5:0;bulb.material.color.setHex(pw?0xffe9a8:0x333333);amb.intensity=pw?.2:.05;
    mt+=dt;if(mt>.4){mt=0;monT.draw();clockT.draw()}if(ln!==night){ln=night;logT.draw()}
    if(mobile)mobile.rotation.y=now/3000;
    fspin+=((fanOn&&pw?1:0)-fspin)*Math.min(1,dt*1.5);blades.rotation.z+=fspin*dt*24;if(fspin>.05)fanHead.rotation.y=Math.sin(now/1600)*.55*Math.min(1,fspin);
