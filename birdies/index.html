@@ -231,7 +231,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 12 (easier)</div>
+<div id="ver">version 13 (lifelike birds)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -783,7 +783,7 @@ const FEA=(()=>{
   x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=2.2;x.beginPath();x.moveTo(32,128);x.lineTo(32,10);x.stroke();
   x.strokeStyle='rgba(0,0,0,.22)';x.lineWidth=.8;x.beginPath();x.moveTo(33.5,128);x.lineTo(33.2,12);x.stroke();
   x.globalCompositeOperation='destination-out';
-  for(let k=0;k<26;k++){const s=Math.random()<.5?-1:1,y=8+Math.random()*112;x.beginPath();x.moveTo(32+s*(10+Math.random()*12),y);x.lineTo(32+s*34,y-5);x.lineTo(32+s*34,y-1);x.closePath();x.fill()}
+  for(let k=0;k<8;k++){const s=Math.random()<.5?-1:1,y=8+Math.random()*112;x.beginPath();x.moveTo(32+s*(10+Math.random()*12),y);x.lineTo(32+s*34,y-5);x.lineTo(32+s*34,y-1);x.closePath();x.fill()}
   for(let y=96;y<128;y+=2){x.fillStyle='rgba(0,0,0,'+((y-96)/40)+')';x.fillRect(0,y,64,2)}
   x.globalCompositeOperation='source-over';
   const tex=new THREE.CanvasTexture(c);
@@ -793,7 +793,7 @@ const FEA=(()=>{
     const nx=X*w*(X>0?1+asym:1-asym);
     p.setXYZ(i,nx,Y,cup*Math.sqrt(Math.max(0,1-X*X))*(.45+.55*Math.sin(Math.max(.05,v)*Math.PI*.9))-(v-.5)*(v-.5)*.25);uv.setXY(i,(X+1)/2,v)}
    g.computeVertexNormals();return g};
-  const mat=()=>new THREE.MeshStandardMaterial({map:tex,alphaTest:.35,side:THREE.DoubleSide,roughness:.82});
+  const mat=()=>new THREE.MeshStandardMaterial({map:tex,alphaTest:.35,side:THREE.DoubleSide,roughness:.78});
   const sc=document.createElement('canvas');sc.width=sc.height=64;const sx=sc.getContext('2d'),sg=sx.createRadialGradient(32,32,2,32,32,32);sg.addColorStop(0,'rgba(0,0,0,.75)');sg.addColorStop(.6,'rgba(0,0,0,.3)');sg.addColorStop(1,'rgba(0,0,0,0)');sx.fillStyle=sg;sx.fillRect(0,0,64,64);
   return {surf:geo(1,0,.28),free:geo(-1,.25,.35),crest:geo(1,.1,.4),mat,shadow:new THREE.CanvasTexture(sc)}})();
  // bent cone: a curved, tapering horn shape (parrot beak, claws)
@@ -831,6 +831,9 @@ const FEA=(()=>{
     const P=new V3(r*nx,y,.86*r*nz),nr=new V3(nx,-dr,nz/.86).normalize(),dn=new V3(dr*nx,1,.86*dr*nz).normalize().negate();
     fl.push({m:surf(P,nr,dn,.044,.075,.016,.1),c:jit(bodyCol(y,P.z),.07)})}}
   mk(fl);
+  {const nk=[];for(let y=.24;y<=.36;y+=.03){const r=.205-(y-.24)*.45;const n=Math.round(2*Math.PI*r/.04);
+   for(let k=0;k<n;k++){const f=k/n*2*Math.PI+(y*37%1)*.3,nx=Math.sin(f),nz=Math.cos(f);if(nz>.55&&y>.3)continue;const P=new V3(r*nx,y,.9*r*nz),nr=new V3(nx,.25,nz).normalize();
+    nk.push({m:surf(P,nr,new V3(0,-1,0),.036,.055,.013,.12),c:jit(bodyCol(y,P.z),.06)})}}mk(nk)}
   if(p.rot){const mt=new THREE.MeshStandardMaterial({color:0x8a8f96,metalness:.8,roughness:.35}),dk=M(0x1a1410);
    for(let k=0;k<5;k++)add(new THREE.BoxGeometry(.34-k*.03,.02,.03),mt,0,-.22+k*.08,.245-k*.004);
    add(new THREE.BoxGeometry(.025,.45,.03),mt,0,-.02,.25);add(new THREE.BoxGeometry(.2,.14,.02),dk,.08,.12,.262,0,0,.4);add(new THREE.BoxGeometry(.12,.1,.02),dk,-.12,-.2,.25,0,0,-.3)}
@@ -844,41 +847,43 @@ const FEA=(()=>{
   const hf=[],R=.178;
   for(let th=-1.0;th<=1.4;th+=.2){const rr=R*Math.cos(th),n=Math.max(5,Math.round(2*Math.PI*rr/.036));
    for(let k=0;k<n;k++){const f=k/n*2*Math.PI+(Math.random()-.5)*.1,sf=Math.sin(f),cf=Math.cos(f);
-    if(cf>.25&&Math.sin(th)>-.55&&Math.sin(th)<.4)continue;
     const P=new V3(rr*sf*1.02,R*Math.sin(th),rr*cf*1.05),nr=P.clone().normalize(),dn=new V3(Math.sin(th)*sf,-Math.cos(th),Math.sin(th)*cf).normalize();
-    hf.push({m:surf(P,nr,dn,.031,.05,.012,.12),c:jit(hcol(P.y,P.z),.06)})}}
+    const face=cf>.25&&Math.sin(th)>-.55&&Math.sin(th)<.4;if(face&&(Math.hypot(Math.abs(P.x)-.1,P.y-.035)<.055||Math.hypot(P.x,P.y+.035)<.065||p.face||p.rn))continue;
+    hf.push({m:surf(P,nr,dn,face?.022:.031,face?.034:.05,.01,face?.08:.12),c:jit(hcol(P.y,P.z),.06)})}}
   mk(hf,head);
   // ---- beak ----
   const bk=new THREE.Group();bk.position.set(0,-.035,.168);bk.scale.setScalar(p.bs||1);head.add(bk);
   {const bmat=c=>{const m=new THREE.MeshPhysicalMaterial({color:c,roughness:.42,clearcoat:.5,clearcoatRoughness:.35});return m};
    const up=add(hookGeo(.082,.19,1.65,20),bmat(p.bk),0,.02,-.03,.92,1.05,1,0,0,0,bk);
-   add(hookGeo(.062,.1,-.7,18),bmat(p.rn?0x121416:C(p.bk).multiplyScalar(.82).getHex()),0,-.045,-.02,.85,1,1,.55,0,0,bk);
+   const jaw=add(hookGeo(.062,.1,-.7,18),bmat(p.rn?0x121416:C(p.bk).multiplyScalar(.82).getHex()),0,-.045,-.02,.85,1,1,.55,0,0,bk);
    add(new THREE.SphereGeometry(.06,16,12),bmat(C(p.bk).lerp(C(p.h),.25).getHex()),0,.03,-.04,.95,.7,.6,0,0,0,bk);
    [-1,1].forEach(sx=>add(new THREE.SphereGeometry(.007,8,6),B(0x1a1210),sx*.02,.07,-.005,1,1,1,0,0,0,bk));
-   if(p.rn)add(new THREE.SphereGeometry(.05,14,10),M(0x121416),0,-.07,.02,.8,.35,1,0,0,0,bk)}
+   if(p.rn)add(new THREE.SphereGeometry(.05,14,10),M(0x121416),0,-.07,.02,.8,.35,1,0,0,0,bk);g.userData.jaw=jaw}
   // ---- eyes (glossy, blink) ----
-  const eyes=[],eyeMat=p.rot?new THREE.MeshBasicMaterial({color:0xff3318}):new THREE.MeshPhysicalMaterial({color:0x050505,roughness:.08,clearcoat:1,clearcoatRoughness:.05});
+  const eyes=[],eyeMat=p.rot?new THREE.MeshBasicMaterial({color:0xff3318}):new THREE.MeshPhysicalMaterial({color:p.iris||0x2a1a12,roughness:.08,clearcoat:1,clearcoatRoughness:.05});
   [-1,1].forEach(sx=>{
    if(p.face)add(new THREE.SphereGeometry(.085,16,12),M(0xf4f4f4),sx*.075,.03,.105,1,1,.45,0,sx*.5,0,head);
    const e1=add(new THREE.SphereGeometry(.043,16,12),p.rot?M(0x0a0504):M(p.ring),sx*.098,.035,.115,1,1,.55,0,sx*.5,0,head);
    const e2=add(new THREE.SphereGeometry(.028,16,12),eyeMat,sx*.106,.035,.132,1,1,.6,0,sx*.5,0,head);
-   add(new THREE.SphereGeometry(.009,8,6),B(0xffffff),sx*.108+.012,.048,.155,1,1,1,0,0,0,head);
+   if(!p.rot)add(new THREE.SphereGeometry(.015,12,10),B(0x000000),sx*.112,.035,.146,1,1,.5,0,sx*.5,0,head);
+   add(new THREE.SphereGeometry(.007,8,6),B(0xffffff),sx*.106+.011,.046,.152,1,1,1,0,0,0,head);
    eyes.push({m:e1,sy:e1.scale.y},{m:e2,sy:e2.scale.y});
    if(p.cheek)add(new THREE.SphereGeometry(.05,14,10),M(0xe8601a),sx*.125,-.035,.06,1,1,.3,0,sx*.9,0,head);
   });
   // crest
   if(p.crest)for(let k=0;k<7;k++){const L=.2+(k===3?.1:k%2?0:.03),a=(k-3)*.11;add(FEA.crest,new THREE.MeshStandardMaterial({color:p.crestc||p.h,map:FEA.mat().map,alphaTest:.35,side:THREE.DoubleSide,roughness:.8}),Math.sin(a)*.05,.17+L*.4,-.04-k*.004,.022,L/2,.02,-.55+Math.abs(k-3)*.09,0,-a,head)}
   // ---- wings: layered real feathers ----
-  const wl=[],wc=C(p.w),wd=C(p.w).multiplyScalar(.7),wlt=C(p.w).lerp(C(p.bl),.3);
-  [-1,1].forEach(sx=>{
-   for(let k=0;k<10;k++){const L=.34-Math.abs(k-4)*.012-(k>5?(k-5)*.01:0);wl.push({m:free(new V3(sx*(.255+k*.002),.12-k*.012,-.07-k*.006),.14,sx*(.03+k*.012),L,.036,.007),c:jit(k<5?wd:wc,.12)})}
-   for(let r=0;r<4;r++)for(let k=0;k<5;k++){const L=.12-r*.008;wl.push({m:free(new V3(sx*(.25+k*.012),.2-r*.055,-.03-r*.004),.1,sx*(.02+k*.01),L,.04,.011),c:jit(wlt.clone().lerp(wc,r/4),.14)})}
-  });
-  mk(wl,g,0,FEA.free);
+  const wc=C(p.w),wd=C(p.w).multiplyScalar(.68),wlt=C(p.w).lerp(C(p.bl),.3),wings=[];
+  [-1,1].forEach(sx=>{const wg=new THREE.Group(),pv=new V3(sx*.24,.21,-.03);wg.position.copy(pv);g.add(wg);wings.push(wg);const wl=[];
+   const at=(x,y,z)=>new V3(x,y,z).sub(pv);
+   for(let k=0;k<10;k++){const L=(.4-Math.abs(k-4)*.013-(k>5?(k-5)*.012:0));wl.push({m:free(at(sx*(.252+k*.002),.12-k*.013,-.08-k*.007),.16,sx*(.03+k*.011),L,.038,.007),c:jit(k<5?wd:wc,.08)})}
+   for(let r=0;r<5;r++)for(let k=0;k<6;k++){const L=.13-r*.008;wl.push({m:free(at(sx*(.247+k*.011),.22-r*.05,-.02-r*.006-k*.004),.1,sx*(.02+k*.009),L,.038,.011),c:jit(wlt.clone().lerp(wc,r/5),.08)})}
+   mk(wl,wg,0,FEA.free)});
   // ---- tail feathers ----
   const tl=p.tl||1,tf=[];
   for(let k=-3;k<=3;k++){const L=(.3+(3-Math.abs(k))*.04)*tl;tf.push({m:free(new V3(k*.025,-.28,-.19),-.3,k*.07,L,.03+(3-Math.abs(k))*.004,.007),c:jit(C(p.t),.12)})}
   const tailM=mk(tf,g,0,FEA.free);
+  const upper=g.children.slice();
   // ---- legs and zygodactyl toes (2 forward, 2 back) with claws ----
   {const fm=new THREE.MeshStandardMaterial({color:p.f,roughness:.95}),cm=new THREE.MeshPhysicalMaterial({color:0x2a2420,roughness:.35,clearcoat:.6}),tg=hookGeo(.013,.1,.5,8),cg=hookGeo(.009,.04,1.7,8);
    [-1,1].forEach(sx=>{
@@ -891,8 +896,10 @@ const FEA=(()=>{
   if(img&&!p.nobadge){const tx=new THREE.Texture(img);if(img.complete)tx.needsUpdate=true;else img.addEventListener('load',()=>tx.needsUpdate=true);
    add(new THREE.CircleGeometry(.095,28),B(0xffffff),0,-.07,.262);
    add(new THREE.CircleGeometry(.082,28),new THREE.MeshBasicMaterial({map:tx}),0,-.07,.266)}
-  g.userData.head=head;g.userData.tail=tailM;g.userData.hyper=!!o.hyper;g.userData.eyes=eyes;return g;
+  {const pose=new THREE.Group();pose.position.y=-.4;pose.rotation.x=.13;g.add(pose);upper.forEach(c=>{g.remove(c);c.position.y+=.4;pose.add(c)});g.userData.pose=pose}
+  g.userData.wings=wings;g.userData.head=head;g.userData.tail=tailM;g.userData.hyper=!!o.hyper;g.userData.eyes=eyes;return g;
  }
+
 
  const BT={},imgs={};
  const bmesh=o=>BT[o.name]||null;
@@ -1046,8 +1053,12 @@ const FEA=(()=>{
    if(fe>0)g.scale.set(bs*(1+fe*.08),g.scale.y*(1+fe*.03),bs*(1+fe*.08));
    if(u.head){const H=u.head;
     if(!(t0<u.hn)||u.hn-t0>8){u.hn=t0+.3+Math.random()*(u.hyper?.5:2.6);const r=Math.random();
-     u.hy=(Math.random()-.5)*(r<.25?1.9:1.1);u.hz=Math.random()<.3?(Math.random()<.5?-1:1)*(.35+Math.random()*.35):(Math.random()-.5)*.15;u.hx=(Math.random()-.5)*.3}
+     u.hy=(Math.random()-.5)*(r<.25?1.9:1.1);u.hz=Math.random()<.3?(Math.random()<.5?-1:1)*(.35+Math.random()*.35):(Math.random()-.5)*.15;u.hx=(Math.random()-.5)*.3-.1}
     const k=.3;H.rotation.y+=(u.hy-H.rotation.y)*k;H.rotation.z+=(u.hz-H.rotation.z)*k+(fe>.5&&t0-u.fz>.7?Math.sin(t0*48)*.22*fe:0);H.rotation.x+=(u.hx-H.rotation.x)*k;H.position.y=.43+Math.sin(t0*2.3+g.id)*.004}
+   if(u.wings){const fl=u.mvg?Math.abs(Math.sin(t0*24)):0,tw=Math.max(0,Math.sin(t0*.37+g.id*3)-.97)*12;
+    u.wings.forEach((w,i)=>{const sx=i?1:-1,tz=sx*(fl*1.1+fe*.12+tw*.08),tx=-fl*.5;w.rotation.z+=(tz-w.rotation.z)*.4;w.rotation.x+=(tx-w.rotation.x)*.4})}
+   if(u.jaw){const ch=Math.max(0,Math.sin(t0*.23+g.id*5)-.9)*10;u.jaw.rotation.x=.55+(ch>0?Math.abs(Math.sin(t0*18))*.35*ch:0)}
+   if(u.pose)u.pose.rotation.z=Math.sin(t0*.45+g.id)*.025;
    if(u.tail)u.tail.rotation.x=Math.sin(t0*2.3+g.id)*.025+(fe>.6?Math.sin(t0*30)*.05:0);
    if(u.hyper){g.position.y+=Math.max(0,Math.sin(t0*7+g.id))*.07;if(u.head)u.head.rotation.y=Math.sin(t0*3.1)*.7;g.rotation.z=Math.sin(t0*5)*.07}
    const bl=((t0*1000+g.id*1300)%3600)<140;if(u.eyes)u.eyes.forEach(e=>e.m.scale.y=e.sy*(bl?.08:1))};
@@ -1065,7 +1076,7 @@ const FEA=(()=>{
     if(d<.35){const en=PT(rm,fwd?'F':'N',b);u.rm=rm;g.position.set(OX(rm)+en[0],g.position.y,en[1])}}
    else step(OX(rm)+x,z,fast?10:2.1);
    const by=(u.rm===rm?y:0)+FT;u.by=(u.by===undefined?by:u.by+(by-u.by)*Math.min(1,dt*8));
-   const moving=ts-(u.mv||-9)<.15;g.position.y=u.by+(moving?Math.abs(Math.sin(ts*10))*.12:0);
+   const moving=ts-(u.mv||-9)<.15;u.mvg=moving;g.position.y=u.by+(moving?Math.abs(Math.sin(ts*10))*.12:0);
    const cp=CPOS[u.rm],want=moving?Math.atan2(u.vx,u.vz):Math.atan2(OX(u.rm)+cp[0]-g.position.x,cp[2]-g.position.z)+Math.sin(ts*.7+g.id)*.18;
    g.rotation.y+=angd(g.rotation.y,want)*Math.min(1,dt*(moving?9:5));
    idle(g,ts);g.visible=true;if(u.stageProp)u.stageProp.visible=(u.rm!==0);if(u.prop){u.prop.visible=(u.rm===0);u.prop.rotation.z=Math.sin(ts*5+g.id)*.025}};
