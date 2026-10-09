@@ -208,6 +208,7 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 @keyframes zm2{from{transform:scale(.08)}to{transform:scale(2.6)}}
 #scare .bimg+.bimg{position:absolute;mix-blend-mode:screen;opacity:.6;filter:hue-rotate(140deg) contrast(2);animation:zm2 .2s forwards,gh .07s infinite alternate}
 @keyframes gh{from{margin-left:-24px}to{margin-left:24px}}
+#app.paused *:not(#pause):not(#pause *){animation-play-state:paused!important}
 #pause{position:absolute;inset:0;background:rgba(0,0,0,.82);display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:60;font-family:Arial,sans-serif;text-align:center}
 #pause.on{display:flex}
 #pause h2{margin:0 0 14px;font:400 clamp(30px,6vw,52px) Arial;color:#ddd;letter-spacing:4px}
@@ -526,11 +527,11 @@ function saveGame(){try{const d={night,hour,t,power,camBat,fanOn,birds:BIRDS.map
 function loadGame(d){start(d.night);hour=d.hour;t=d.t;power=d.power;camBat=d.camBat;fanOn=d.fanOn;
  BIRDS.forEach((b,i)=>{const v=d.birds[i];if(v){b.pos=v[0];b.side=v[1];b.wait=v[2];b.cd=v[3];if(v[4])b.mv=v[4]}});
  if(d.pk){pk.stage=d.pk[0];pk.tm=d.pk[1];pk.need=d.pk[2];pk.hits=d.pk[3]}render()}
-function pauseGame(){if(state!=='play'||paused)return;if($('scare').classList.contains('on')||$('card').style.display==='flex')return;paused=true;clearInterval(loop);try{ac&&ac.suspend()}catch(e){}$('pMsg').textContent='';$('pause').classList.add('on');try{$('pResume').focus()}catch(e){}}
-function resumeGame(){if(!paused)return;paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}clearInterval(loop);loop=setInterval(step,100)}
+function pauseGame(){if(state!=='play'||paused)return;if($('scare').classList.contains('on')||$('card').style.display==='flex')return;paused=true;$('app').classList.add('paused');clearInterval(loop);try{ac&&ac.suspend()}catch(e){}$('pMsg').textContent='';$('pause').classList.add('on');try{$('pResume').focus()}catch(e){}}
+function resumeGame(){if(!paused)return;paused=false;$('app').classList.remove('paused');$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}clearInterval(loop);loop=setInterval(step,100)}
 $('pResume').onclick=resumeGame;
 $('pSave').onclick=()=>{$('pMsg').textContent=saveGame()?'Game saved. (Night '+night+', '+(hour===0?12:hour)+' AM)':'Could not save.'};
-const leave=()=>{paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}stopMB();$('dark').style.opacity=0;menu()};
+const leave=()=>{paused=false;$('app').classList.remove('paused');$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}stopMB();$('dark').style.opacity=0;menu()};
 $('pMenu').onclick=leave;
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(e.repeat)return;e.preventDefault();paused?resumeGame():pauseGame()}},true);
@@ -992,6 +993,7 @@ function init3D(){
  let running=true;
  function frame(now){
   if(!running)return;requestAnimationFrame(frame);
+  if(paused){last=now;return}
   try{
    const dt=Math.min(.05,(now-last)/1000);last=now;
    if(cam){if(CAM3){try{camFrame(now,dt)}catch(e){console.error(e);CAM3=false;view.classList.remove('cam3d')}}return}
