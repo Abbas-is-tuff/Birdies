@@ -241,7 +241,7 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
   <div id="ov"></div>
   <div id="scare"></div>
   <div id="card"></div>
-  <div id="pause"><h2>PAUSED</h2><button id="pResume">Resume</button><button id="pSave">Save Game</button><button id="pExit">Exit</button><small id="pMsg"></small></div>
+  <div id="pause"><h2>PAUSED</h2><button id="pResume">Resume</button><button id="pSave">Save Game</button><button id="pMenu">Exit to Main Menu</button><button id="pExit">Exit Game</button><small id="pMsg"></small></div>
   <div id="eyes"><i></i><i></i></div>
   <div id="title"><canvas id="tstatic"></canvas><img id="tbird" alt=""><div id="tmenu"><div id="tstar"></div><h1>5<br>Nights<br>At<br>Birdies</h1><button id="tnew">New Game</button><button id="tcont">Continue</button><button id="tinstall" style="display:none">Install App</button><div id="tnight"></div></div></div>
  </div>
@@ -530,7 +530,9 @@ function pauseGame(){if(state!=='play'||paused)return;if($('scare').classList.co
 function resumeGame(){if(!paused)return;paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}clearInterval(loop);loop=setInterval(step,100)}
 $('pResume').onclick=resumeGame;
 $('pSave').onclick=()=>{$('pMsg').textContent=saveGame()?'Game saved. (Night '+night+', '+(hour===0?12:hour)+' AM)':'Could not save.'};
-$('pExit').onclick=()=>{paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}stopMB();menu();try{window.close()}catch(e){}};
+const leave=()=>{paused=false;$('pause').classList.remove('on');try{ac&&ac.resume()}catch(e){}stopMB();$('dark').style.opacity=0;menu()};
+$('pMenu').onclick=leave;
+$('pExit').onclick=()=>{leave();try{window.close()}catch(e){}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(e.repeat)return;e.preventDefault();paused?resumeGame():pauseGame()}},true);
 document.addEventListener('keydown',e=>{if(e.repeat||paused)return;const m={a:'L',d:'R',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(m)toggle(m);const lm={'1':'L','2':'R'}[e.key];if(lm)light(lm);if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();camToggle()}});
 
