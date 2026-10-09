@@ -175,7 +175,7 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 
 #view.cam3d.camon #cam{background:transparent}
 #view.cam3d #camdecor{display:none}
-#view.camon #gl{filter:saturate(.65) contrast(1.2) brightness(1.08) sepia(.12) blur(.4px)}
+#view.camon #gl{filter:saturate(1) contrast(1.2) brightness(1.08) sepia(.12) blur(.4px)}
 #view.camon::before{z-index:3;opacity:.32}
 .stat{position:fixed;inset:0;background:#888 url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.85;animation:gr .15s steps(3) infinite}
 
@@ -711,14 +711,14 @@ function init3D(){
  // bird planes
  const PAL={
   snow:{b:0xe4e0d4,h:0xf0ece2,bl:0xf2eee4,bk:0xd8506a,w:0xd6d2c6,t:0xbcb8ac,ring:0xe0506a,f:0xd8808c,tl:.8,bs:.9},
-  owl:{b:0xa6aec2,h:0xf0dccf,bl:0xe6e2ec,bk:0xe8a090,w:0x8791a6,t:0x5a606e,ring:0xf4eee8,f:0xd8a8a0,tl:.6},
+  owl:{b:0x6f86b4,h:0xd8e0f0,bl:0xa9b9da,bk:0xe8a090,w:0x4d6494,t:0x34466c,ring:0xf4eee8,f:0xd8a8a0,tl:.6},
   sugar:{b:0x58b2c2,h:0xe6eaec,bl:0xc4dce2,bk:0xe8b0a0,w:0x3f98ac,t:0x3f98ac,ring:0xffffff,f:0x8c8c92,tl:.6},
   ananas:{b:0x7a8a3a,h:0x9a8566,bl:0xe0a070,bk:0xb09a88,w:0x4f8a2e,t:0x9a3a2c,ring:0xe4e4e0,f:0xa8a098,tl:1.3},
   abbas:{b:0x4aa03a,h:0xe0501e,bl:0x9ac84a,bk:0xe8b090,w:0x3a8a2e,t:0xe86a2a,ring:0x222222,f:0x8a7a80,tl:.6},
   lemon:{b:0x5a6a2a,h:0x2e3558,bl:0x9a5a28,bk:0x6a4a1a,w:0x3a5a24,t:0x4a6a2a,ring:0xff3a1a,f:0x3a3a38,tl:1.1,collar:0x8a9a3a,rot:1},
   pk:{b:0x3fae3a,h:0x52c040,bl:0xb4d84a,bk:0xd8383f,w:0x35a03a,t:0x2f9a8a,ring:0xd9902a,f:0xcfc8c0,tl:1.7,bs:1,rn:1,nobadge:1},
   pika:{b:0xf4e84a,h:0xf8ee5a,bl:0xf8f08a,bk:0xa89a94,w:0xe8dc44,t:0xe0d03c,ring:0x333333,f:0xb0a098,tl:1.7,crest:1,cheek:1},
-  snowfl:{b:0xe2dacc,h:0xf4f0e8,bl:0xeee8dc,bk:0xb09890,w:0xbfb09a,t:0xcfc4b0,ring:0x333338,f:0xd58a80,tl:1.7,crest:1},
+  snowfl:{b:0xf2ead8,h:0xfff6dc,bl:0xfff4e0,bk:0xb09890,w:0xd9c9a0,t:0xe6d6a8,ring:0x333338,f:0xd58a80,tl:1.7,crest:1,cheek:1,crestc:0xf6d24a},
   sal:{b:0x8a8e96,h:0xa2a6ac,bl:0x9ca0a6,bk:0x1e1e22,w:0x6e727a,t:0xd83a2a,ring:0xf2f2f2,f:0x7a7a80,tl:.8,face:1}};
  const ftex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,128,128);g.strokeStyle='rgba(0,0,0,.28)';g.lineWidth=2;
   for(let r=0;r<8;r++)for(let k=0;k<8;k++){const x=k*16+(r%2?8:0),y=r*16+6;g.beginPath();g.arc(x,y,9,.1,Math.PI-.1);g.stroke()}
@@ -789,7 +789,7 @@ function init3D(){
    if(p.cheek)add(new THREE.SphereGeometry(.05,14,10),M(0xe8601a),sx*.125,-.035,.06,1,1,.3,0,sx*.9,0,head);
   });
   // crest
-  if(p.crest)for(let k=0;k<7;k++){const L=.2+(k===3?.1:k%2?0:.03),a=(k-3)*.11;add(new THREE.ConeGeometry(.026,L,8),M(p.h),Math.sin(a)*.05,.17+L*.4,-.04-k*.004,1,1,1,-.55+Math.abs(k-3)*.09,0,-a,head)}
+  if(p.crest)for(let k=0;k<7;k++){const L=.2+(k===3?.1:k%2?0:.03),a=(k-3)*.11;add(new THREE.ConeGeometry(.026,L,8),M(p.crestc||p.h),Math.sin(a)*.05,.17+L*.4,-.04-k*.004,1,1,1,-.55+Math.abs(k-3)*.09,0,-a,head)}
   // ---- wings: layered real feathers ----
   const wl=[],wc=C(p.w),wd=C(p.w).multiplyScalar(.7),wlt=C(p.w).lerp(C(p.bl),.3);
   [-1,1].forEach(sx=>{
