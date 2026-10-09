@@ -217,7 +217,8 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 #pause button::before{content:'>> ';opacity:0}#pause button:hover::before,#pause button:focus-visible::before{opacity:1}
 #pause small{color:#8c8;font-size:15px;min-height:20px;margin-top:10px}
 html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none}
-#app{height:100vh;height:100dvh}
+html,body{overflow:hidden;position:fixed;inset:0;width:100%}
+#app{position:fixed!important;inset:0;height:auto!important;width:100%;max-width:none;padding-bottom:env(safe-area-inset-bottom,0)!important}
 #pbtn{display:none;position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));width:42px;height:42px;z-index:8;background:rgba(40,40,40,.75);border:2px solid #888;color:#eee;font:700 14px Arial;border-radius:4px;padding:0;touch-action:manipulation}
 #rot{display:none;position:fixed;inset:0;z-index:200;background:#000;color:#ddd;align-items:center;justify-content:center;text-align:center;font:400 22px/1.5 Arial;padding:30px}
 #rot b{display:block;font-size:64px;margin-bottom:10px}
@@ -334,9 +335,9 @@ if(window.matchMedia&&matchMedia('(display-mode: fullscreen), (display-mode: sta
 if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});
  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
  navigator.serviceWorker.ready.then(()=>caches.open('birdies-v5').then(c=>c.match('index.html')).then(h=>{if(h){const o=document.getElementById('offl');if(o)o.style.display='block'}})).catch(()=>{})});
-function hideTitle(){$('app').classList.remove('inmenu');$('title').classList.remove('on');clearInterval(tIv);tIv=0}
+function hideTitle(){try{$('offl').style.opacity=0}catch(e){}$('app').classList.remove('inmenu');$('title').classList.remove('on');clearInterval(tIv);tIv=0}
 function menu(){
- state='menu';clearInterval(loop);$('ov').classList.remove('on');
+ state='menu';clearInterval(loop);$('ov').classList.remove('on');try{$('offl').style.opacity=.8}catch(e){}
  const T=$('title');T.classList.add('on');$('app').classList.add('inmenu');
  const sn=savedNight();
  const sv=getSave();$('tcont').style.display=(sn>1||sv)?'block':'none';$('tnight').style.display=(sn>1||sv)?'block':'none';$('tnight').textContent='Night '+(sv?sv.night:sn);
