@@ -216,7 +216,17 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 #pause button:hover,#pause button:focus-visible{color:#fff;text-shadow:0 0 12px #fff;outline:0}
 #pause button::before{content:'>> ';opacity:0}#pause button:hover::before,#pause button:focus-visible::before{opacity:1}
 #pause small{color:#8c8;font-size:15px;min-height:20px;margin-top:10px}
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none}
+#app{height:100vh;height:100dvh}
+#pbtn{display:none;position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));width:42px;height:42px;z-index:8;background:rgba(40,40,40,.75);border:2px solid #888;color:#eee;font:700 14px Arial;border-radius:4px;padding:0;touch-action:manipulation}
+#rot{display:none;position:fixed;inset:0;z-index:200;background:#000;color:#ddd;align-items:center;justify-content:center;text-align:center;font:400 22px/1.5 Arial;padding:30px}
+#rot b{display:block;font-size:64px;margin-bottom:10px}
+@media (pointer:coarse){#app:not(.inmenu) #pbtn{display:block}#camname,#camsub{margin-left:50px}}
+@media (orientation:portrait) and (pointer:coarse){#rot{display:flex}}
+@media (max-height:480px){#camname{font-size:20px!important}#camsub{font-size:11px!important}#camtabs{bottom:66px!important;width:min(230px,42vw)!important}#camtabs button{padding:3px 2px!important}}
+@supports(padding:max(0px)){#camtabs{right:max(12px,env(safe-area-inset-right))}}
 </style></head><body>
+<div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
  <div id="hud"><div id="clockbox"><b id="clock">12 AM</b><span>Night <b id="n">1</b></span></div></div>
  <div id="usage"><div id="azz"></div><div id="pwline">Power left: <b id="pw">100</b>%</div><div id="batline">Camera <span class="bb"><i id="batfill"></i></span> <span id="batp">100</span>%</div><div id="uline">Usage: <span id="ubars"></span><span id="urate"></span></div><span id="utime"></span><div id="ubreak"></div><span class="bar"><i id="pb" style="width:100%"></i></span></div>
@@ -242,6 +252,7 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
   <div id="ov"></div>
   <div id="scare"></div>
   <div id="card"></div>
+  <button id="pbtn" aria-label="Pause">❚❚</button>
   <div id="pause"><h2>PAUSED</h2><button id="pResume">Resume</button><button id="pSave">Save Game</button><button id="pMenu">Exit to Main Menu</button><small id="pMsg"></small></div>
   <div id="eyes"><i></i><i></i></div>
   <div id="title"><canvas id="tstatic"></canvas><img id="tbird" alt=""><div id="tmenu"><div id="tstar"></div><h1>5<br>Nights<br>At<br>Birdies</h1><button id="tnew">New Game</button><button id="tcont">Continue</button><button id="tinstall" style="display:none">Install App</button><div id="tnight"></div></div></div>
@@ -535,6 +546,16 @@ const leave=()=>{paused=false;$('app').classList.remove('paused');$('pause').cla
 $('pMenu').onclick=leave;
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(e.repeat)return;e.preventDefault();paused?resumeGame():pauseGame()}},true);
+
+// ===== mobile: pause button, fullscreen + landscape lock, auto-pause in portrait =====
+$('pbtn').onpointerdown=e=>{e.preventDefault();pauseGame()};
+if(matchMedia('(pointer:coarse)').matches){
+ const go=()=>{document.removeEventListener('pointerdown',go);const d=document.documentElement;try{const f=d.requestFullscreen||d.webkitRequestFullscreen;const r=f&&f.call(d);if(r&&r.catch)r.catch(()=>{})}catch(e){}try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};
+ document.addEventListener('pointerdown',go);
+ const chk=()=>{if(innerHeight>innerWidth)pauseGame()};
+ addEventListener('resize',chk);addEventListener('orientationchange',chk);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
+}
 document.addEventListener('keydown',e=>{if(e.repeat||paused)return;const m={a:'L',d:'R',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(m)toggle(m);const lm={'1':'L','2':'R'}[e.key];if(lm)light(lm);if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();camToggle()}});
 
 const AC=()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();return ac};
