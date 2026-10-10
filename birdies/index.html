@@ -216,6 +216,12 @@ html,body{background:#000;font-family:Arial,Helvetica,sans-serif}
 @keyframes zm2{from{transform:scale(.08)}to{transform:scale(2.6)}}
 #scare .bimg+.bimg{position:absolute;mix-blend-mode:screen;opacity:.6;filter:hue-rotate(140deg) contrast(2);animation:zm2 .2s forwards,gh .07s infinite alternate}
 @keyframes gh{from{margin-left:-24px}to{margin-left:24px}}
+#scare.on::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 28%,rgba(0,0,0,.75) 78%,#000 100%);z-index:3}
+#scare.on::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:4;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+#scare.pre::after{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 10%,#000 70%)}
+#scare.on:not(.pre) .bimg:first-of-type{animation:zm3 1.7s cubic-bezier(.1,.9,.2,1.1) forwards}
+@keyframes zm3{0%{transform:scale(.05)}6%{transform:scale(3.3)}20%{transform:scale(2.5)}30%{transform:scale(3.3) rotate(-2deg)}45%{transform:scale(2.8) rotate(2deg)}60%{transform:scale(3.6) rotate(-3deg)}100%{transform:scale(4.2) rotate(2deg)}}
+#scare .eyeglow{position:absolute;left:50%;top:38%;width:60%;height:14%;transform:translateX(-50%);z-index:2;pointer-events:none;background:radial-gradient(circle at 25% 50%,#fff 0 4%,#f20 9%,transparent 22%),radial-gradient(circle at 75% 50%,#fff 0 4%,#f20 9%,transparent 22%);mix-blend-mode:screen;animation:gh .05s infinite alternate}
 #app.paused *:not(#pause):not(#pause *){animation-play-state:paused!important}
 #pause{position:absolute;inset:0;background:rgba(0,0,0,.82);display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:60;font-family:Arial,sans-serif;text-align:center}
 #pause.on{display:flex}
@@ -238,7 +244,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 52 (Kiwi voice)</div>
+<div id="ver">version 54 (Jumpscare x67)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -864,14 +870,36 @@ function bigScream(){try{const a=AC(),t=a.currentTime,dist=a.createWaveShaper(),
   const l=a.createOscillator(),lg=a.createGain();l.frequency.value=38+i*9;lg.gain.value=120*m;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+1.6);o.connect(dist);o.start(t);o.stop(t+1.6)});
  const sb=a.createOscillator(),sg=a.createGain();sb.frequency.setValueAtTime(75,t);sb.frequency.exponentialRampToValueAtTime(28,t+.9);sg.gain.setValueAtTime(.9,t);sg.gain.exponentialRampToValueAtTime(.001,t+1);sb.connect(sg);sg.connect(a.destination);sb.start(t);sb.stop(t+1.05)}catch(e){}
  noiseBurst(1,.55)}
+function creepDrone(){try{const a=AC(),t=a.currentTime,g=a.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.3,t+.7);g.gain.setValueAtTime(0,t+.74);g.connect(a.destination);
+ [220,311,466].forEach((f,i)=>{const o=a.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*(1.6+i*.2),t+.72);o.connect(g);o.start(t);o.stop(t+.75)});
+ for(let k=0;k<2;k++){const o=a.createOscillator(),hg=a.createGain();o.frequency.value=48;hg.gain.setValueAtTime(0,t+.1+k*.28);hg.gain.linearRampToValueAtTime(.5,t+.13+k*.28);hg.gain.exponentialRampToValueAtTime(.001,t+.28+k*.28);o.connect(hg);hg.connect(a.destination);o.start(t);o.stop(t+.8)}}catch(e){}}
+function scream2(){try{const a=AC(),t=a.currentTime,dist=a.createWaveShaper(),cv=new Float32Array(256);for(let i=0;i<256;i++)cv[i]=Math.tanh((i/128-1)*9);dist.curve=cv;
+ const g=a.createGain();g.gain.setValueAtTime(.6,t);g.gain.setValueAtTime(.6,t+1.5);g.gain.exponentialRampToValueAtTime(.001,t+2.2);dist.connect(g);g.connect(a.destination);
+ const lo=a.createOscillator();lo.type='sawtooth';lo.frequency.setValueAtTime(70,t);lo.frequency.linearRampToValueAtTime(45,t+2);lo.connect(dist);lo.start(t);lo.stop(t+2.2);
+ const hi=a.createOscillator(),lf=a.createOscillator(),lg=a.createGain();hi.type='square';hi.frequency.setValueAtTime(2400,t);hi.frequency.linearRampToValueAtTime(3600,t+.2);hi.frequency.linearRampToValueAtTime(2000,t+2);lf.frequency.value=55;lg.gain.value=500;lf.connect(lg);lg.connect(hi.frequency);lf.start(t);lf.stop(t+2.2);hi.connect(dist);hi.start(t);hi.stop(t+2.2);
+ [.25,.55,.95,1.4].forEach(d=>setTimeout(()=>noiseBurst(.25,.6),d*1000))}catch(e){}}
 function scare(b){
  state='dead';clearInterval(loop);stopMB();phoneStop();zatHide();const hadSave=runFromSave&&!!getSave();try{if(runFromSave)localStorage.removeItem(SAVEK)}catch(e){}
- const s=$('scare');s.innerHTML='';s.classList.add('on','pre');bigRumble();
+ const s=$('scare');s.innerHTML='';s.classList.add('on','pre');bigRumble();creepDrone();
+ const calm=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+ const over=()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) ${hadSave?'<br><br>💾 Your saved game was lost. Night '+night+' starts over from 12 AM.':''}<br><br>Tip: close a door as soon as you see a bird in it — but mind your power.`,'Restart Night '+night,()=>begin(night),1)};
+ // 1) dread: black, then a 70ms subliminal flash of the face, black again
+ setTimeout(()=>{s.classList.remove('pre');s.innerHTML=bhtml(b,1);s.style.filter='contrast(2) brightness(.9)';noiseBurst(.07,.6)},520);
+ setTimeout(()=>{s.innerHTML='';s.classList.add('pre');s.style.filter=''},600);
+ // 2) the real jumpscare
  setTimeout(()=>{
-  s.classList.remove('pre');s.innerHTML=bhtml(b,1)+bhtml(b,1);s.classList.add('red');bigScream();setTimeout(()=>s.classList.remove('red'),120);
-  try{navigator.vibrate&&navigator.vibrate([250,60,350,60,600])}catch(e){}
-  try{$('view').animate([{filter:'brightness(4) invert(1)'},{filter:'none'}],{duration:180})}catch(e){}
-  setTimeout(()=>{s.innerHTML='<div class="stat" style="opacity:1"></div>';snd(90,.7,'sawtooth',.2);setTimeout(()=>{s.classList.remove('on');overlay('You were pecked to death',`${b.death} (${HOURS[hour]}) ${hadSave?'<br><br>💾 Your saved game was lost. Night '+night+' starts over from 12 AM.':''}<br><br>Tip: close a door as soon as you see a bird in it — but mind your power.`,'Restart Night '+night,()=>begin(night),1)},900)},1700)},280);
+  s.classList.remove('pre');s.innerHTML=bhtml(b,1)+bhtml(b,1);s.classList.add('red');bigScream();scream2();scream2();setTimeout(()=>s.classList.remove('red'),140);
+  try{navigator.vibrate&&navigator.vibrate([300,40,200,40,300,40,200,40,900])}catch(e){}
+  try{$('view').animate([{filter:'brightness(6) invert(1)'},{filter:'none'}],{duration:260})}catch(e){}
+  const fl=calm?0:setInterval(()=>{const r=Math.random();s.style.filter=r<.22?'invert(1)':r<.38?'hue-rotate(180deg) contrast(2.5)':r<.5?'brightness(0)':r<.62?'saturate(4) contrast(2)':'';if(r>.9)noiseBurst(.14,.6)},75);
+  let sx=0;const sk=setInterval(()=>{sx++;s.style.transformOrigin=(40+Math.random()*20)+'% '+(40+Math.random()*20)+'%'},60);
+  // 3) fake ending: cut to silence + tinnitus ring
+  setTimeout(()=>{clearInterval(fl);clearInterval(sk);s.style.filter='';s.innerHTML='<div style="position:absolute;inset:0;background:#000"></div>';
+   try{const a=AC(),t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.frequency.value=6200;g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+1.2);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+1.3)}catch(e){}
+   // 4) second lunge when you think it's over
+   setTimeout(()=>{s.classList.remove('pre');s.innerHTML=bhtml(b,1);s.classList.add('red');noiseBurst(.5,.9);bigRumble();bigScream();snd(70,.5,'sawtooth',.3);
+    try{navigator.vibrate&&navigator.vibrate([500])}catch(e){}
+    setTimeout(()=>{s.classList.remove('red');s.innerHTML='<div class="stat" style="opacity:1"></div>';noiseBurst(.5,.5);setTimeout(over,700)},520)},950)},2400)},1050);
 }
 
 function win(){try{if(night>=5)localStorage.setItem('fnab_done','1');saveNight(Math.min(5,night+1))}catch(e){}
