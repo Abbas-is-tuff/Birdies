@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 48 (Mango)</div>
+<div id="ver">version 49 (Spacing)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -1581,8 +1581,8 @@ const FEA=(()=>{
   BIRDS.forEach(b=>{const rm=b.pos===-1?5:b.pos===0?0:b.pos===1?1:b.pos===2?2:b.pos===3?(b.side==='L'?3:4):b.pos===8?7:-1;if(rm>=0)lists[rm].push(b)});
   if(sal.active)lists[sal.side==='L'?3:4].push(sal);
   const slot=(rm,i,n,b)=>{
-   if(rm===0)return[-3+(i%5)*1.5,.4,i<5?-3.35:-2.15];
-   if(rm===1)return[(i%2?.8:-.8),0,-1.2-(i%5)*1.5];
+   if(rm===0){const row=Math.floor(i/6);return[-3.25+(i%6)*1.3+(row%2?.65:0),.4,-4.5+Math.min(row,3)*1.0]}
+   if(rm===1)return[(i%2?.8:-.8),0,-1.2-(i%9)*.8];
    if(rm===2){const sd=b.side==='R'?1:-1;let h=0;for(const ch of b.name)h=(h*31+ch.charCodeAt(0))|0;
     if(i===0&&(h&1))return sd<0?[-3,.8,-2]:[3.2,.7,-2.2];
     const k=(h&1)?i-1:i;return[sd*(3.4-k*.7),0,-.2+k*.15]}
@@ -1624,6 +1624,10 @@ const FEA=(()=>{
    g.rotation.y+=angd(g.rotation.y,want)*Math.min(1,dt*(moving?9:5));
    if(b.scared)g.position.x+=Math.sin(ts*50)*.015;idle(g,ts);g.visible=true;if(u.stageProp)u.stageProp.visible=(u.rm!==0);if(u.prop){u.prop.visible=(u.rm===0);u.prop.rotation.z=Math.sin(ts*5+g.id)*.025}};
   lists.forEach((arr,rm)=>arr.forEach((b,i)=>{const p=slot(rm,i,arr.length,b).slice();if(b.hyper&&rm!==0&&p.length>2){p[0]+=Math.sin(ts*.9+3)*.9;p[2]+=Math.cos(ts*.7)*.5}put(b,rm,p[0],p[1],p[2],false)}));
+  {const vis=[];lists.forEach(arr=>arr.forEach(b=>{const g=CB[b.name];if(g&&g.visible)vis.push(g)}));
+   for(let a=0;a<vis.length;a++)for(let c=a+1;c<vis.length;c++){const A=vis[a],B=vis[c],ua=A.userData,ub=B.userData;if(ua.rm!==ub.rm)continue;
+    const dx=B.position.x-A.position.x,dz=B.position.z-A.position.z,d=Math.hypot(dx,dz)||.001,mn=.4*((ua.bs||1.05)*(ua.sx||1)+(ub.bs||1.05)*(ub.sx||1))/1.05*.95;
+    if(d<mn){const p=(mn-d)/2*Math.min(1,dt*10),nx=dx/d,nz=dz/d;A.position.x-=nx*p;A.position.z-=nz*p;B.position.x+=nx*p;B.position.z+=nz*p}}}
   {const JP=[0,[-2.3,3.4,0],[-.8,.9,0],[.2,-4.95,.2],[0,-5.45,.2]],g=CB[jaf.name];
    if(g){const u=g.userData;
     if(r===8&&jaf.st>=1){const T=JP[jaf.st];if(jaf.px===undefined||camSnap){jaf.px=T[0];jaf.pz=T[1];jaf.py=T[2]}
