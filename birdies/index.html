@@ -238,7 +238,7 @@ html,body{overflow:hidden;position:fixed;inset:0;width:100%}
 #ver{position:fixed;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:9;font:11px Arial;color:#777;pointer-events:none;display:none}
 #app.inmenu~#ver,body.menu #ver{display:block}
 </style></head><body>
-<div id="ver">version 37 (Zatoot)</div>
+<div id="ver">version 38 (Zatoot talks)</div>
 <div id="offl">✓ Saved for offline play</div>
 <div id="rot"><div><b>⟳</b>Rotate your phone sideways to play</div></div>
 <div id="app">
@@ -454,6 +454,9 @@ const ZW=[
 ['SERENDIPITY','A happy accident','A bad omen','A kind of nest','Only serendipity has kept you alive so far.'],
 ['INEXORABLE','Impossible to stop','Easy to break','Very quiet','The dawn is inexorable. So am I.']];
 let zatLast=-1,zatCap=0;
+const ZN=['Hi!','Hello there.','Hello, night guard.','Good evening.','Hey, guard!','How are you?','Nice to see you.','Are you awake?','Peekaboo!','What is your name?','Do you have any seeds?','I see you.','Goodnight.','Hi, friend.','Who is there?'];
+const ZG=['Hi!','Hello there.','Good evening.','Hey, guard.','Hello again.'];
+const zpick=a=>a[Math.floor(Math.random()*a.length)];
 function zatSpeak(text,vol){try{if(!('speechSynthesis' in window))return;const u=new SpeechSynthesisUtterance(text);const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));u.voice=v.find(x=>/daniel|david|alex|guy|mark|male|fred|arthur|rishi/i.test(x.name))||v[0]||null;u.lang=u.voice?u.voice.lang:'en-GB';u.pitch=.35;u.rate=.8;u.volume=vol||1;speechSynthesis.speak(u)}catch(e){}}
 function zatCaw(){[0,110,230].forEach((d,i)=>setTimeout(()=>{snd(260-i*40,.12,'sawtooth',.16);snd(190-i*30,.12,'square',.08)},d))}
 function zatSay(t){const e=$('zsay');e.textContent='“'+t+'”';e.style.display='block';clearTimeout(zatCap);zatCap=setTimeout(()=>e.style.display='none',3200)}
@@ -465,10 +468,10 @@ function zatAsk(b){
  b.q={w:w,wrong:0};b.qt=b.qm=Math.max(6,([13,10.5,8.5][diff]||10)-night*.5);
  $('zqt').textContent='“'+w[4]+'”';$('zqd').textContent='What does "'+w[0]+'" mean?';
  const bx=$('zqb');bx.innerHTML='';opts.forEach(o=>{const bt=document.createElement('button');bt.textContent=o[0];bt.onpointerdown=e=>{e.preventDefault();zatAnswer(b,o[1],bt)};bx.appendChild(bt)});
- $('zq').style.display='block';zatCaw();setTimeout(()=>zatSpeak(w[4]+' What does '+w[0].toLowerCase()+' mean?'),350)}
+ $('zq').style.display='block';zatCaw();const gr=zpick(ZG);zatSay(gr);setTimeout(()=>zatSpeak(gr+' '+w[4]+' What does '+w[0].toLowerCase()+' mean?'),350)}
 function zatAnswer(b,ok,bt){
  if(!b.q||state!=='play')return;
- if(ok){b.q=null;$('zq').style.display='none';zatSay('Correct. You are... tolerable.');zatSpeak('Correct. You are tolerable.',.9);snd(659,.15,'triangle',.1);setTimeout(()=>snd(880,.25,'triangle',.1),150);
+ if(ok){b.q=null;$('zq').style.display='none';{const bye=zpick(['Correct. You are tolerable. Goodbye!','Nice one. See you later!','Correct. Thank you. Bye bye!']);zatSay(bye);zatSpeak(bye,.9)}snd(659,.15,'triangle',.1);setTimeout(()=>snd(880,.25,'triangle',.1),150);
   b.pos=Math.random()<.5?0:1;b.side=rndSide();b.wait=0;b.blk=0;b.cd=14+Math.random()*8-night}
  else{b.q.wrong++;bt.disabled=true;zatCaw();if(b.q.wrong>=2){b.q=null;$('zq').style.display='none';scare(b);return}
   b.qt=Math.min(b.qt,b.qm*.45);zatSay('Incorrect. Think, little guard.');zatSpeak('Incorrect. Think, little guard.',.9)}}
@@ -480,7 +483,7 @@ function zatStep(b,dt){
    else{const j=(Math.random()<.4&&b.pos<2)?2:1;b.pos=Math.min(3,b.pos+j);snd(80,.14,'square',.2);
     if(b.pos>=2)b.side=rndSide();
     if(b.pos===3){b.wait=0;b.blk=0;b.sT=0;scratch(b.side);zatCaw()}
-    else{const w=ZW[Math.floor(Math.random()*ZW.length)][0].toLowerCase();zatSay(w);zatSpeak(w,.4)}}}
+    else{const w=Math.random()<.6?zpick(ZN):ZW[Math.floor(Math.random()*ZW.length)][0].toLowerCase();zatSay(w);zatSpeak(w,.5)}}}
   return}
  const cl=closed[b.side]&&power>0;
  if(cl){b.blk=(b.blk||0)+dt;b.sT=(b.sT||0)+dt;
